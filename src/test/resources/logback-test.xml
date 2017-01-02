@@ -1,0 +1,16 @@
+<configuration> 
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg  %ex{4}%n</pattern>
+    </encoder>
+  </appender>
+
+  <root level="INFO">
+    <appender-ref ref="STDOUT" />
+  </root>
+
+  <!-- change level to INFO to log request/response -->
+  <logger name="org.mockserver" level="ERROR"/>
+
+  </configuration>
