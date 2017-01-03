@@ -20,12 +20,13 @@ public class TracerExecuteTest {
 
   @Before
   public void setupTracer() {
-    tracer = new Tracer("service") {
+    tracer = new Tracer() {
       @Override
       void queueSpan(Span qs) {
         span = qs;
       }
     };
+    tracer.setTraceConfiguration(TraceConfiguration.getDefault());
   }
 
   @After

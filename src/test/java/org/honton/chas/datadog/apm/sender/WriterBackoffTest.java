@@ -3,6 +3,7 @@ package org.honton.chas.datadog.apm.sender;
 import java.util.concurrent.TimeUnit;
 
 import org.honton.chas.datadog.apm.SpanBuilderTest;
+import org.honton.chas.datadog.apm.TraceConfiguration;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
@@ -55,8 +56,7 @@ public class WriterBackoffTest {
 
   private Writer startWriter() throws InterruptedException {
     Writer writer = new Writer();
-    writer.apmUri = "http://localhost:7755";
-    writer.backoffDuration = 100;
+    writer.setTraceConfiguration(new TraceConfiguration("service", "http://localhost:7755", 100));
     writer.initialize();
     return writer;
   }

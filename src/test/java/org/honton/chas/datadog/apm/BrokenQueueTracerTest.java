@@ -15,12 +15,13 @@ public class BrokenQueueTracerTest {
 
   @Before
   public void setupTracer() {
-    tracer = new Tracer("service") {
+    tracer = new Tracer() {
       @Override
       void queueSpan(Span qs) {
         throw new RuntimeException(RE_MESSAGE);
       }
     };
+    tracer.setTraceConfiguration(TraceConfiguration.getDefault());
   }
 
   private void testRunnable(boolean throwException) throws URISyntaxException, IOException {

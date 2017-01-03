@@ -20,12 +20,13 @@ public class TraceContainerFilterTest {
 
   private void test(String clientTraceId, String clientSpanId) throws IOException, URISyntaxException {
 
-    Tracer tracer = new Tracer("service") {
+    Tracer tracer = new Tracer() {
       @Override
       void queueSpan(Span qs) {
         span = qs;
       }
     };
+    tracer.setTraceConfiguration(TraceConfiguration.getDefault());
 
     TraceContainerFilter scf = new TraceContainerFilter();
     scf.tracer = tracer;

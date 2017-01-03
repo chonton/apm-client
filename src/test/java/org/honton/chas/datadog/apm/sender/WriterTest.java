@@ -3,6 +3,7 @@ package org.honton.chas.datadog.apm.sender;
 import java.util.concurrent.TimeUnit;
 
 import org.honton.chas.datadog.apm.SpanBuilderTest;
+import org.honton.chas.datadog.apm.TraceConfiguration;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -72,7 +73,7 @@ public class WriterTest {
 
   private Writer startWriter(String url) throws InterruptedException {
     Writer writer = new Writer();
-    writer.apmUri = url;
+    writer.setTraceConfiguration(new TraceConfiguration("service", "http://localhost:7755", TimeUnit.MINUTES.toMillis(1)));
     writer.initialize();
 
     writer.queue(SpanBuilderTest.getTestSpan());
@@ -103,7 +104,7 @@ public class WriterTest {
     Writer writer = startWriter("http://localhost:1");
     Assert.assertFalse(writer.isStopped());
     writer.queue(SpanBuilderTest.getTestSpan());
-    Thread.yield();
+    Thread.sleep(200);
     Assert.assertTrue(writer.isStopped());
   }
 }

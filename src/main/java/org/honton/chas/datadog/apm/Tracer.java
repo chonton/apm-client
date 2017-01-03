@@ -28,10 +28,11 @@ public class Tracer {
   @Inject
   private Writer writer;
 
-  private final String service;
+  private String service;
 
-  public Tracer(String service) {
-    this.service = service;
+  @Inject
+  void setTraceConfiguration(TraceConfiguration configuration) {
+    service = configuration.getService();
   }
 
   /**

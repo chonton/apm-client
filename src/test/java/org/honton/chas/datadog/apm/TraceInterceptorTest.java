@@ -15,12 +15,13 @@ public class TraceInterceptorTest {
 
   private void test(Object response) throws Exception {
 
-    Tracer tracer = new Tracer("service") {
+    Tracer tracer = new Tracer() {
       @Override
       void queueSpan(Span qs) {
         span = qs;
       }
     };
+    tracer.setTraceConfiguration(TraceConfiguration.getDefault());
 
     TraceInterceptor ti = new TraceInterceptor();
     ti.tracer = tracer;

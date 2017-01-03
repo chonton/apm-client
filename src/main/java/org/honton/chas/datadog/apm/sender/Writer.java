@@ -1,14 +1,15 @@
 package org.honton.chas.datadog.apm.sender;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.NotSupportedException;
 import javax.ws.rs.client.WebTarget;
 
+import org.honton.chas.datadog.apm.TraceConfiguration;
 import org.honton.chas.datadog.apm.api.ApmApi;
 import org.honton.chas.datadog.apm.api.ApmApi0_2;
 import org.honton.chas.datadog.apm.api.ApmApi0_3;
@@ -30,8 +31,14 @@ public class Writer {
   private Thread worker;
   private ApmApi apmApi;
   long backoffExpiration;
-  long backoffDuration = TimeUnit.MINUTES.toMillis(1);
-  String apmUri = "http://localhost:7777";
+  private long backoffDuration;
+  private String apmUri;
+
+  @Inject
+  void setTraceConfiguration(TraceConfiguration configuration) {
+    backoffDuration = configuration.getBackoffDuration();
+    apmUri = configuration.getCollectorUrl();
+  }
 
   @PostConstruct
   void initialize() {
