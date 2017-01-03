@@ -5,8 +5,10 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 import org.honton.chas.datadog.apm.api.Span;
+import org.honton.chas.datadog.apm.sender.Writer;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -18,10 +20,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Tracer {
 
-  static final String SPAN_ID = "X-SpanId";
-  static final String TRACE_ID = "X-TraceId";
+  static final String SPAN_ID = "x-ddtrace-parent_span_id";
+  static final String TRACE_ID = "x-ddtrace-parent_trace_id";
 
   private ThreadLocal<SpanBuilder> currentSpan = new ThreadLocal<>();
+
+  @Inject
+  private Writer writer;
 
   private final String service;
 
@@ -147,12 +152,12 @@ public class Tracer {
       Span span = current.finishSpan(service);
       queueSpan(span);
     } catch (RuntimeException re) {
-      log.error("unexpected exception in tracing", re);
+      log.error("Exception in tracing", re);
     }
   }
 
   void queueSpan(Span span) {
-    // TODO Auto-generated method stub
+    writer.queue(span);
   }
 
   private SpanBuilder createSpan(String resource, String operation) {

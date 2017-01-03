@@ -24,6 +24,14 @@ public class SpanBuilderTest {
     return Arrays.asList(trace);
   }
 
+  public static Span getTestSpan() {
+    return SpanBuilder.createRoot().finishSpan("service");
+  }
+
+  public static Trace getTestTrace() {
+    return new Trace(getTestSpan());
+  }
+
   @Test
   public void testRootChildRelations() {
     SpanBuilder rootBuilder = SpanBuilder.createRoot();
@@ -100,4 +108,5 @@ public class SpanBuilderTest {
     Assert.assertEquals("java.lang.RuntimeException", builder.meta().get("error.type"));
     Assert.assertTrue(builder.meta().get("error.stack").contains("testSetException"));
   }
+
 }

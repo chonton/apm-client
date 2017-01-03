@@ -292,9 +292,19 @@
                   <element>BUNDLE</element>
                   <limits>
                     <limit>
-                      <counter>COMPLEXITY</counter>
+                      <counter>INSTRUCTION</counter>
                       <value>COVEREDRATIO</value>
                       <minimum>0.70</minimum>
+                    </limit>
+                  </limits>
+                </rule>
+                <rule>
+                  <element>CLASS</element>
+                  <limits>
+                    <limit>
+                      <counter>INSTRUCTION</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>0.50</minimum>
                     </limit>
                   </limits>
                 </rule>
