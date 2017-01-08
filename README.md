@@ -1,9 +1,9 @@
 # apm-client
-A java client to push TCP messages to a datadog APM collector.
+A java client to push TCP messages to a Datadog APM collector.
 
 ### Requirements
 * Minimal latency in the mainline processing
-* Some, but not extreme buffering of outgoing messages
+* Some, but not extreme, buffering of outgoing messages
 * Thread-safe sender
 * Lack of APM collector will be noted, but not cause failure of mainline processing
 
@@ -11,7 +11,7 @@ A java client to push TCP messages to a datadog APM collector.
 * A local (on the same host) APM collector
 
 ## Maven Coordinates
-To include dogstatd-client in your maven build, use the following fragment in your pom.
+To include apm-client in your maven build, use the following fragment in your pom.
 ```xml
   <build>
     <plugins>
@@ -25,17 +25,9 @@ To include dogstatd-client in your maven build, use the following fragment in yo
 ```
 
 ## Use with CDI
-Use CDI to inject the Tracer and intercept bean invocations.
+Use CDI to intercept bean invocations or to inject the Tracer for programmatic use.
 
-#### Access the Tracer
-```java
-
-  @Inject
-  private Tracer tracer;
-
-```
-
-### Use TraceOperation annotation to report bean invocation.
+### Use TraceOperation annotation to report bean invocations without application code.
 ```java
   @TraceOperation
   public class ExampleBean {
@@ -57,9 +49,17 @@ Use CDI to inject the Tracer and intercept bean invocations.
 }
 ```
 
+#### Inject the Tracer to report spans with application code.
+```java
+
+  @Inject
+  private Tracer tracer;
+
+```
+
 ## Typical Jax-RS Use
 
-### Register TraceContainerFilter with JaxRS to trace incoming requests
+### Register TraceContainerFilter with JaxRS to report incoming requests
 ```java
   @ApplicationPath("/")
   public class ExampleApplication extends Application {
@@ -76,7 +76,7 @@ Use CDI to inject the Tracer and intercept bean invocations.
   }
 ```
 
-### Register TraceClientFilter with JaxRS to trace outgoing requests
+### Register TraceClientFilter with JaxRS to report outgoing requests (and propagate x-ddtrace- headers)
 ```java
   /**
    * Create a JaxRs Client with registered TraceClientFilter
@@ -89,7 +89,6 @@ Use CDI to inject the Tracer and intercept bean invocations.
 ```
 
 ## Functional Java Use
-
 ```java
 
   String rc = tracer.executeCallable("resource", "operation", () -> {

@@ -29,6 +29,6 @@ public class TraceClientFilter implements ClientRequestFilter, ClientResponseFil
 
   @Override
   public void filter(ClientRequestContext requestContext, ClientResponseContext responseContext) throws IOException {
-    tracer.finishSpan();
+    tracer.closeCurrentSpan();
   }
 }

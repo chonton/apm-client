@@ -52,7 +52,7 @@ public class Tracer {
       builder.exception(e);
       throw e;
     } finally {
-      finishSpan(builder);
+      closeSpan(builder);
     }
   }
 
@@ -61,7 +61,7 @@ public class Tracer {
    * 
    * @param resource The resource being called
    * @param operation The operation being called
-   * @param callable The runnable to invoke
+   * @param runnable The runnable to invoke
    */
   @SneakyThrows
   public void executeRunnable(String resource, String operation, Runnable runnable) {
@@ -72,7 +72,7 @@ public class Tracer {
       builder.exception(e);
       throw e;
     } finally {
-      finishSpan(builder);
+      closeSpan(builder);
     }
   }
 
@@ -90,10 +90,8 @@ public class Tracer {
    * 
    * @param headerAccess The function access to headers. Function supplied with header name and
    *        should return the header value.
-   * @param resource The name of the resource for the span.
-   * @param operation The name of the operation for the span.
    */
-  void importSpan(Function<String, String> headerAccess, String resource, String operation) {
+  SpanBuilder importSpan(Function<String, String> headerAccess) {
     SpanBuilder current;
 
     String traceIdHeader = headerAccess.apply(TRACE_ID);
@@ -104,7 +102,8 @@ public class Tracer {
       long spanId = Long.parseUnsignedLong(headerAccess.apply(SPAN_ID), 16);
       current = SpanBuilder.createChild(traceId, spanId);
     }
-    currentSpan.set(current.resource(resource).operation(operation).type("http"));
+    currentSpan.set(current);
+    return current;
   }
 
   /**
@@ -137,8 +136,8 @@ public class Tracer {
   /**
    * Finish the current span and restore the current span's parent as the current span
    */
-  final void finishSpan() {
-    finishSpan(currentSpan.get());
+  void closeCurrentSpan() {
+    closeSpan(currentSpan.get());
   }
 
   /**
@@ -147,7 +146,7 @@ public class Tracer {
    * 
    * @param current The currently active span
    */
-  final void finishSpan(SpanBuilder current) {
+  void closeSpan(SpanBuilder current) {
     try {
       currentSpan.set(current.parent());
       Span span = current.finishSpan(service);

@@ -28,7 +28,7 @@ public class TraceInterceptor {
     } finally {
       Method method = ctx.getMethod();
       span.resource(method.getDeclaringClass().getCanonicalName()).operation(method.getName());
-      tracer.finishSpan(span);
+      tracer.closeSpan(span);
     }
   }
 }

@@ -15,3 +15,5 @@
 log/
 target/
 pom.xml.bak
+build.log
+interpolated-pom.xml
