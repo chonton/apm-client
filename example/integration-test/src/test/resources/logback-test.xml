@@ -1,0 +1,17 @@
+<configuration debug="true">
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>[%thread] %-5level %logger{36} - %msg  %ex{short}%n</pattern>
+    </encoder>
+  </appender>
+
+  <root level="INFO">
+    <appender-ref ref="STDOUT" />
+  </root>
+
+  <!-- change level to INFO to log request/response -->
+  <logger name="org.mockserver" level="INFO"/>
+  <!-- logger name="org.jboss.weld" level="DEBUG"/ -->
+
+  </configuration>
