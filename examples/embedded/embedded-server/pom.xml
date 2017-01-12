@@ -3,14 +3,13 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.honton.chas.datadog</groupId>
-    <artifactId>apm-example</artifactId>
+    <groupId>org.honton.chas.datadog.apm.examples</groupId>
+    <artifactId>embedded</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
-  <groupId>org.honton.chas.datadog</groupId>
-  <artifactId>apm-example-server</artifactId>
+  <artifactId>embedded-server</artifactId>
 
   <dependencies>
 
@@ -120,14 +119,14 @@
     </dependency>
 
     <dependency>
-      <groupId>org.honton.chas.datadog</groupId>
-      <artifactId>apm-client</artifactId>
+      <groupId>org.honton.chas.datadog.apm</groupId>
+      <artifactId>client</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
-      <groupId>org.honton.chas.datadog</groupId>
-      <artifactId>apm-example-api</artifactId>
+      <groupId>org.honton.chas.datadog.apm.examples</groupId>
+      <artifactId>embedded-api</artifactId>
       <version>${project.version}</version>
     </dependency>
 

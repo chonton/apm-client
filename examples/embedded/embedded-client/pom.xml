@@ -3,13 +3,13 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.honton.chas.datadog</groupId>
-    <artifactId>apm-example</artifactId>
+    <groupId>org.honton.chas.datadog.apm.examples</groupId>
+    <artifactId>embedded</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
-  <artifactId>apm-example-client</artifactId>
+  <artifactId>embedded-client</artifactId>
 
   <dependencies>
 
@@ -40,15 +40,15 @@
     </dependency>
 
     <dependency>
-      <groupId>org.honton.chas.datadog</groupId>
-      <artifactId>apm-client</artifactId>
+      <groupId>org.honton.chas.datadog.apm</groupId>
+      <artifactId>client</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>
     </dependency>
 
     <dependency>
-      <groupId>org.honton.chas.datadog</groupId>
-      <artifactId>apm-example-api</artifactId>
+      <groupId>org.honton.chas.datadog.apm.examples</groupId>
+      <artifactId>embedded-api</artifactId>
       <version>${project.version}</version>
     </dependency>
 
@@ -125,11 +125,11 @@
               <name>example-server</name>
               <healthcheckUrl>http://127.0.0.1:5555/health</healthcheckUrl>
               <waitAfterLaunch>5</waitAfterLaunch>
-              <workingDir>../../server/target/</workingDir>
+              <workingDir>../../embedded-server/target/</workingDir>
               <arguments>
                 <argument>${java.home}/bin/java</argument>
                 <argument>-jar</argument>
-                <argument>apm-example-server-${project.version}.jar</argument>
+                <argument>embedded-server-${project.version}.jar</argument>
               </arguments>
             </configuration>
           </execution>

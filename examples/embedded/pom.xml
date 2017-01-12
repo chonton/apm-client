@@ -3,21 +3,19 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.honton.chas.datadog</groupId>
-    <artifactId>apm-example</artifactId>
+    <groupId>org.honton.chas.datadog.apm.examples</groupId>
+    <artifactId>examples</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
-  <artifactId>apm-example-api</artifactId>
+  <artifactId>embedded</artifactId>
+  <packaging>pom</packaging>
 
-<dependencies>
-
-  <dependency>
-    <groupId>javax.ws.rs</groupId>
-    <artifactId>javax.ws.rs-api</artifactId>
-  </dependency>
-
-</dependencies>
+  <modules>
+    <module>embedded-api</module>
+    <module>embedded-server</module>
+    <module>embedded-client</module>
+  </modules>
 
 </project>
