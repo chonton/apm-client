@@ -11,4 +11,13 @@
 
   <artifactId>apm-example-api</artifactId>
 
+<dependencies>
+
+  <dependency>
+    <groupId>javax.ws.rs</groupId>
+    <artifactId>javax.ws.rs-api</artifactId>
+  </dependency>
+
+</dependencies>
+
 </project>

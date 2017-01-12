@@ -1,4 +1,4 @@
-package org.honton.chas.datadog.apm.example.integration;
+package org.honton.chas.datadog.apm.example.client;
 
 import java.util.concurrent.TimeUnit;
 import javax.enterprise.context.ApplicationScoped;
@@ -15,7 +15,7 @@ public class TraceConfigurationFactory {
   @Produces
   static TraceConfiguration getDefault() {
     return new TraceConfiguration(
-      "greetings-server",
+      "greetings-client",
       "http://localhost:7777",
       TimeUnit.MINUTES.toMillis(1));
   }

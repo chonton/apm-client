@@ -21,7 +21,7 @@ public class TraceInterceptorTest {
         span = qs;
       }
     };
-    tracer.setTraceConfiguration(DefaultTraceConfigurationFactory.DEFAULTS);
+    tracer.setTraceConfiguration(TraceConfigurationFactory.DEFAULTS);
 
     TraceInterceptor ti = new TraceInterceptor();
     ti.tracer = tracer;

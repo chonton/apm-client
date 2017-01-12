@@ -3,6 +3,8 @@ package org.honton.chas.datadog.apm;
 import java.io.IOException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.honton.chas.datadog.apm.api.Span;
@@ -17,13 +19,13 @@ public class TraceServletFilterTest {
 
   private void test(String clientTraceId, String clientSpanId, int statusCode) throws IOException, ServletException {
 
-    Tracer tracer = new Tracer() {
+    final Tracer tracer = new Tracer() {
         @Override
         void queueSpan(Span qs) {
             span = qs;
         }
     };
-    tracer.setTraceConfiguration(DefaultTraceConfigurationFactory.DEFAULTS);
+    tracer.setTraceConfiguration(TraceConfigurationFactory.DEFAULTS);
 
     TraceServletFilter tsf = new TraceServletFilter();
     tsf.setTracer(tracer);
@@ -43,7 +45,12 @@ public class TraceServletFilterTest {
     Mockito.when(resp.getStatus()).thenReturn(statusCode);
 
     Assert.assertNull(tracer.getCurrentSpan());
-    FilterChain filter = (q, p) -> {activeInFilter = tracer.getCurrentSpan();};
+    FilterChain filter = new FilterChain() {
+      @Override public void doFilter(ServletRequest request, ServletResponse response)
+        throws IOException, ServletException {
+        activeInFilter = tracer.getCurrentSpan();
+      }
+    };
     tsf.doFilter(req, resp, filter);
     Assert.assertNull(tracer.getCurrentSpan());
 

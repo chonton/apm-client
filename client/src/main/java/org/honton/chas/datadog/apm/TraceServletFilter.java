@@ -2,7 +2,6 @@ package org.honton.chas.datadog.apm;
 
 import java.io.IOException;
 import java.net.URLDecoder;
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -13,11 +12,11 @@ import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.honton.chas.datadog.apm.Tracer.HeaderAccessor;
 
 /**
  * Trace import for http requests
  */
-@ApplicationScoped
 @WebFilter("/")
 public class TraceServletFilter implements Filter {
 
@@ -36,10 +35,14 @@ public class TraceServletFilter implements Filter {
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
       throws IOException, ServletException {
 
-    HttpServletRequest req = (HttpServletRequest) request;
-    HttpServletResponse resp = (HttpServletResponse) response;
+    final HttpServletRequest req = (HttpServletRequest) request;
+    final HttpServletResponse resp = (HttpServletResponse) response;
 
-    SpanBuilder sb = tracer.importSpan(n -> req.getHeader(n));
+    SpanBuilder sb = tracer.importSpan(new HeaderAccessor() {
+      @Override public String getValue(String name) {
+        return req.getHeader(name);
+      }
+    });
     try {
       sb.resource(req.getServerName() + ':' + req.getServerPort())
         .operation(req.getMethod() + ':' + URLDecoder.decode(req.getRequestURI(), "UTF-8"))

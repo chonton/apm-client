@@ -26,7 +26,7 @@ public class TracerExecuteTest {
         span = qs;
       }
     };
-    tracer.setTraceConfiguration(DefaultTraceConfigurationFactory.DEFAULTS);
+    tracer.setTraceConfiguration(TraceConfigurationFactory.DEFAULTS);
   }
 
   @After
@@ -38,7 +38,7 @@ public class TracerExecuteTest {
     Assert.assertEquals("operation", span.getOperation());
   }
 
-  private void testCallable(boolean throwException) throws URISyntaxException, IOException {
+  private void testCallable(final boolean throwException) throws URISyntaxException, IOException {
     Callable<Long> runnable = new Callable<Long>() {
       @Override
       public Long call() throws Exception {
@@ -70,7 +70,7 @@ public class TracerExecuteTest {
     }
   }
 
-  private void testRunnable(boolean throwException) throws URISyntaxException, IOException {
+  private void testRunnable(final boolean throwException) throws URISyntaxException, IOException {
     Runnable runnable = new Runnable() {
       @Override
       public void run() {

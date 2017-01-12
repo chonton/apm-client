@@ -21,10 +21,10 @@ public class BrokenQueueTracerTest {
         throw new RuntimeException(RE_MESSAGE);
       }
     };
-    tracer.setTraceConfiguration(DefaultTraceConfigurationFactory.DEFAULTS);
+    tracer.setTraceConfiguration(TraceConfigurationFactory.DEFAULTS);
   }
 
-  private void testRunnable(boolean throwException) throws URISyntaxException, IOException {
+  private void testRunnable(final boolean throwException) throws URISyntaxException, IOException {
     Runnable runnable = new Runnable() {
       @Override
       public void run() {

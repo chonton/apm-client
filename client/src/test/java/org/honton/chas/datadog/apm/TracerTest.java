@@ -8,7 +8,7 @@ public class TracerTest {
   @Test
   public void testParentChild() throws Exception {
     Tracer tracer = new Tracer();
-    tracer.setTraceConfiguration(DefaultTraceConfigurationFactory.DEFAULTS);
+    tracer.setTraceConfiguration(TraceConfigurationFactory.DEFAULTS);
 
     SpanBuilder rootBuilder = tracer.createSpan();
     Assert.assertNull(rootBuilder.parent());

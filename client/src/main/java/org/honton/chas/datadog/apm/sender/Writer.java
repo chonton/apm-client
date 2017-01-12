@@ -1,14 +1,12 @@
 package org.honton.chas.datadog.apm.sender;
 
 import java.util.List;
-
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.NotSupportedException;
 import javax.ws.rs.client.WebTarget;
-
+import lombok.extern.slf4j.Slf4j;
 import org.honton.chas.datadog.apm.TraceConfiguration;
 import org.honton.chas.datadog.apm.api.ApmApi;
 import org.honton.chas.datadog.apm.api.ApmApi0_2;
@@ -20,9 +18,6 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
-import lombok.extern.slf4j.Slf4j;
-
-@ApplicationScoped
 @Slf4j
 public class Writer {
 

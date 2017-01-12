@@ -1,6 +1,5 @@
 package org.honton.chas.datadog.apm;
 
-import javax.annotation.Priority;
 import lombok.Value;
 
 /**
@@ -8,7 +7,6 @@ import lombok.Value;
  * Usually provided by a cdi @Produces factory method in application code.
  */
 @Value
-@Priority(0)
 public class TraceConfiguration {
 
   /**

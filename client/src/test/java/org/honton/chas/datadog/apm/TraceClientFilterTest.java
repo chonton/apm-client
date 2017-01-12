@@ -27,7 +27,7 @@ public class TraceClientFilterTest {
         span = qs;
       }
     };
-    tracer.setTraceConfiguration(DefaultTraceConfigurationFactory.DEFAULTS);
+    tracer.setTraceConfiguration(TraceConfigurationFactory.DEFAULTS);
 
     TraceClientFilter scf = new TraceClientFilter();
     scf.tracer = tracer;

@@ -1,8 +1,6 @@
 package org.honton.chas.datadog.apm;
 
 import java.util.concurrent.Callable;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -19,6 +17,14 @@ import lombok.extern.slf4j.Slf4j;
 @ApplicationScoped
 @Slf4j
 public class Tracer {
+
+  interface HeaderAccessor {
+    String getValue(String name);
+  }
+
+  interface HeaderMutator {
+    void setValue(String name, String value);
+  }
 
   static final String SPAN_ID = "x-ddtrace-parent_span_id";
   static final String TRACE_ID = "x-ddtrace-parent_trace_id";
@@ -88,18 +94,18 @@ public class Tracer {
   /**
    * Import a span across process boundaries using a set of headers.
    * 
-   * @param headerAccess The function access to headers. Function supplied with header name and
+   * @param headerAccessor The function access to headers. Function supplied with header name and
    *        should return the header value.
    */
-  SpanBuilder importSpan(Function<String, String> headerAccess) {
+  SpanBuilder importSpan(HeaderAccessor headerAccessor) {
     SpanBuilder current;
 
-    String traceIdHeader = headerAccess.apply(TRACE_ID);
+    String traceIdHeader = headerAccessor.getValue(TRACE_ID);
     if (traceIdHeader == null) {
       current = SpanBuilder.createRoot();
     } else {
-      long traceId = Long.parseUnsignedLong(traceIdHeader, 16);
-      long spanId = Long.parseUnsignedLong(headerAccess.apply(SPAN_ID), 16);
+      long traceId = Long.parseLong(traceIdHeader, 16);
+      long spanId = Long.parseLong(headerAccessor.getValue(SPAN_ID), 16);
       current = SpanBuilder.createChild(traceId, spanId);
     }
     currentSpan.set(current);
@@ -111,13 +117,13 @@ public class Tracer {
    * 
    * @param resource The remote resource being invoked
    * @param operation The remote operation being invoked
-   * @param headerAccess The function access to headers. Function supplied with header name and
+   * @param headerAccessor The function access to headers. Function supplied with header name and
    *        value.
    */
-  void exportSpan(String resource, String operation, BiConsumer<String, String> headerAccess) {
+  void exportSpan(String resource, String operation, HeaderMutator headerAccessor) {
     SpanBuilder span = createSpan(resource, operation).type("http");
-    headerAccess.accept(TRACE_ID, Long.toHexString(span.traceId()));
-    headerAccess.accept(SPAN_ID, Long.toHexString(span.spanId()));
+    headerAccessor.setValue(TRACE_ID, Long.toHexString(span.traceId()));
+    headerAccessor.setValue(SPAN_ID, Long.toHexString(span.spanId()));
   }
 
   /**

@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import java.util.Map;
 import org.honton.chas.datadog.apm.api.Span;
 import org.honton.chas.datadog.apm.api.Trace;
 import org.junit.Assert;
@@ -93,10 +94,12 @@ public class SpanBuilderTest {
     Assert.assertEquals("type", builder.type("type").type());
 
     Assert.assertNull(builder.meta());
-    Assert.assertSame(Collections.emptyMap(), builder.meta(Collections.emptyMap()).meta());
+    Map<String, String> stringString = Collections.emptyMap();
+    Assert.assertSame(stringString, builder.meta(stringString).meta());
 
+    Map<String, Number> stringNumber = Collections.emptyMap();
     Assert.assertNull(builder.metrics());
-    Assert.assertSame(Collections.emptyMap(), builder.metrics(Collections.emptyMap()).metrics());
+    Assert.assertSame(stringNumber, builder.metrics(stringNumber).metrics());
   }
 
   @Test

@@ -14,6 +14,16 @@
   <dependencies>
 
     <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>javax.enterprise</groupId>
       <artifactId>cdi-api</artifactId>
     </dependency>
@@ -33,6 +43,7 @@
       <groupId>org.honton.chas.datadog</groupId>
       <artifactId>apm-client</artifactId>
       <version>${project.version}</version>
+      <scope>runtime</scope>
     </dependency>
 
     <dependency>
@@ -47,16 +58,123 @@
     </dependency>
 
     <dependency>
-      <groupId>org.jboss.resteasy</groupId>
-      <artifactId>resteasy-jackson2-provider</artifactId>
-      <scope>runtime</scope>
+      <groupId>org.jboss.weld.se</groupId>
+      <artifactId>weld-se</artifactId>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
-      <groupId>org.jglue.cdi-unit</groupId>
-      <artifactId>cdi-unit</artifactId>
+      <groupId>org.mock-server</groupId>
+      <artifactId>mockserver-client-java</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mock-server</groupId>
+      <artifactId>mockserver-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mock-server</groupId>
+      <artifactId>mockserver-netty</artifactId>
+      <classifier>jar-with-dependencies</classifier>
       <scope>test</scope>
     </dependency>
 
   </dependencies>
+
+  <build>
+    <plugins>
+
+      <!-- for integration testing start and stop mock server and executable jar -->
+      <plugin>
+        <groupId>com.bazaarvoice.maven.plugins</groupId>
+        <artifactId>process-exec-maven-plugin</artifactId>
+        <version>0.7</version>
+        <executions>
+          <!-- start the mock apm server -->
+          <execution>
+            <id>mock-apm-server</id>
+            <goals>
+              <goal>start</goal>
+            </goals>
+            <phase>pre-integration-test</phase>
+            <configuration>
+              <name>mock-apm-server</name>
+              <waitAfterLaunch>5</waitAfterLaunch>
+              <arguments>
+                <argument>${java.home}/bin/java</argument>
+                <argument>-Dmockserver.logLevel=ERROR</argument>
+                <argument>-jar</argument>
+                <argument>${org.mock-server:mockserver-netty:jar:jar-with-dependencies}</argument>
+                <argument>-serverPort</argument>
+                <argument>7777</argument>
+              </arguments>
+            </configuration>
+          </execution>
+
+          <!-- start the executable jar -->
+          <execution>
+            <id>example-server</id>
+            <goals>
+              <goal>start</goal>
+            </goals>
+            <phase>pre-integration-test</phase>
+            <configuration>
+              <name>example-server</name>
+              <healthcheckUrl>http://127.0.0.1:5555/health</healthcheckUrl>
+              <waitAfterLaunch>5</waitAfterLaunch>
+              <workingDir>../../server/target/</workingDir>
+              <arguments>
+                <argument>${java.home}/bin/java</argument>
+                <argument>-jar</argument>
+                <argument>apm-example-server-${project.version}.jar</argument>
+              </arguments>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>stop-all</id>
+            <goals>
+              <goal>stop-all</goal>
+            </goals>
+            <phase>post-integration-test</phase>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- locate dependencies so we can launch mock server  -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.0.0</version>
+        <executions>
+          <execution>
+            <id>locate-dependencies</id>
+            <goals>
+              <!-- set maven properties to location of dependencies -->
+              <goal>properties</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Run the integration tests -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+  </build>
+
 </project>

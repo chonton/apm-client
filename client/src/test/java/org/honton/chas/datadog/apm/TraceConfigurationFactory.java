@@ -1,16 +1,12 @@
 package org.honton.chas.datadog.apm;
 
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Priority;
-import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Produces;
 
 /**
- * Factory default trace server configuration values.
- * Any non-@Alternative cdi @Produces factory method in application code.
+ * Trace server configuration values for testing
  */
-@Priority(0)
-public class DefaultTraceConfigurationFactory {
+public class TraceConfigurationFactory {
 
   public static final TraceConfiguration DEFAULTS = new TraceConfiguration(
         "service",
@@ -21,9 +17,8 @@ public class DefaultTraceConfigurationFactory {
    * Get the default configuration.  Only called if CDI does not find any other Producer.
    * @return The default configuration
    */
-  @Alternative
   @Produces
-  public TraceConfiguration getDefault() {
+  static public TraceConfiguration getDefault() {
     return DEFAULTS;
   }
 }

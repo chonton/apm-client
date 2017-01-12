@@ -54,6 +54,11 @@
     </dependency>
 
     <dependency>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>javax.ws.rs-api</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
@@ -122,13 +127,6 @@
 
     <dependency>
       <groupId>org.honton.chas.datadog</groupId>
-      <artifactId>apm-example-client</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.honton.chas.datadog</groupId>
       <artifactId>apm-example-api</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -142,12 +140,6 @@
     <dependency>
       <groupId>org.jboss.weld.servlet</groupId>
       <artifactId>weld-servlet-core</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jglue.cdi-unit</groupId>
-      <artifactId>cdi-unit</artifactId>
-      <scope>test</scope>
     </dependency>
 
     <dependency>
@@ -208,6 +200,26 @@
 
   <build>
     <plugins>
+
+      <!-- copy dependencies into child directory so that executable jar can use -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.0.0</version>
+        <executions>
+          <execution>
+            <id>copy-dependencies</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <includeScope>runtime</includeScope>
+              <outputDirectory>${project.build.directory}/dependencies</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
       <!-- configure jar plugin to build executable jar with HelloMain as main-class and dependencies in class-path -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -218,10 +230,12 @@
               <mainClass>org.honton.chas.datadog.apm.example.server.HelloMain</mainClass>
               <addClasspath>true</addClasspath>
               <useUniqueVersions>false</useUniqueVersions>
+              <classpathPrefix>dependencies</classpathPrefix>
             </manifest>
           </archive>
         </configuration>
       </plugin>
+
     </plugins>
   </build>
 
