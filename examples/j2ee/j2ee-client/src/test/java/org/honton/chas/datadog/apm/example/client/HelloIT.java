@@ -53,14 +53,23 @@ public class HelloIT {
         .withDelay(new Delay(TimeUnit.MILLISECONDS, 20)));
   }
 
+  private HttpRequest[] getRequests() throws InterruptedException {
+    HttpRequest v2traces = HttpRequest.request().withMethod("PUT").withPath("/v0.2/traces");
+    HttpRequest[] requests;
+    // wait for server to deliver traces
+    for (long expire = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(10);
+        System.currentTimeMillis() < expire; Thread.sleep(200)) {
+      requests = new MockServerClient("localhost", APM_PORT).retrieveRecordedRequests(v2traces);
+      if (requests.length == 3) {
+        return requests;
+      }
+    }
+    throw new AssertionError("Did not get 3 request within 10 seconds");
+  }
+
   @After
   public void verifyMockWasCalled() throws InterruptedException, IOException {
-    // wait for server to deliver traces
-    Thread.sleep(2000);
-
-    HttpRequest v2traces = HttpRequest.request().withMethod("PUT").withPath("/v0.2/traces");
-    HttpRequest[] requests = new MockServerClient("localhost", APM_PORT).retrieveRecordedRequests(v2traces);
-    Assert.assertEquals(3, requests.length);
+    HttpRequest[] requests = getRequests();
 
     Span intercepted = null;
     Span client = null;
@@ -95,11 +104,6 @@ public class HelloIT {
     Assert.assertEquals("org.honton.chas.datadog.apm.example.server.Greeting", intercepted.getResource());
     Assert.assertEquals(server.getTraceId(), intercepted.getTraceId());
     Assert.assertEquals(server.getSpanId(), (long)intercepted.getParentId());
-  }
-
-  class SpanHierarchy {
-    Span parent;
-    Span child;
   }
 
   @Test
