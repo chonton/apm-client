@@ -75,13 +75,6 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>org.mock-server</groupId>
-      <artifactId>mockserver-netty</artifactId>
-      <classifier>jar-with-dependencies</classifier>
-      <scope>test</scope>
-    </dependency>
-
   </dependencies>
 
   <build>
@@ -106,7 +99,7 @@
                 <argument>${java.home}/bin/java</argument>
                 <argument>-Dmockserver.logLevel=ERROR</argument>
                 <argument>-jar</argument>
-                <argument>${org.mock-server:mockserver-netty:jar:jar-with-dependencies}</argument>
+                <argument>dependency/mockserver-netty-${mockserver.version}-jar-with-dependencies.jar</argument>
                 <argument>-serverPort</argument>
                 <argument>7777</argument>
               </arguments>
@@ -149,10 +142,20 @@
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
           <execution>
-            <id>locate-dependencies</id>
+            <id>copy-dependency</id>
             <goals>
-              <goal>properties</goal>
+              <goal>copy</goal>
             </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                    <groupId>org.mock-server</groupId>
+                    <artifactId>mockserver-netty</artifactId>
+                    <classifier>jar-with-dependencies</classifier>
+                    <version>${mockserver.version}</version>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
           </execution>
         </executions>
       </plugin>

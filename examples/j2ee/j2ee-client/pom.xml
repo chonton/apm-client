@@ -82,19 +82,6 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>org.mock-server</groupId>
-      <artifactId>mockserver-netty</artifactId>
-      <classifier>jar-with-dependencies</classifier>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-runner</artifactId>
-      <scope>test</scope>
-    </dependency>
-
   </dependencies>
 
   <build>
@@ -119,7 +106,7 @@
                 <argument>${java.home}/bin/java</argument>
                 <argument>-Dmockserver.logLevel=ERROR</argument>
                 <argument>-jar</argument>
-                <argument>${org.mock-server:mockserver-netty:jar:jar-with-dependencies}</argument>
+                <argument>dependency/mockserver-netty-${mockserver.version}-jar-with-dependencies.jar</argument>
                 <argument>-serverPort</argument>
                 <argument>7777</argument>
               </arguments>
@@ -140,10 +127,10 @@
               <arguments>
                 <argument>${java.home}/bin/java</argument>
                 <argument>-jar</argument>
-                <argument>${org.eclipse.jetty:jetty-runner:jar}</argument>
+                <argument>dependency/jetty-runner-${jetty.version}.jar</argument>
                 <argument>--port</argument>
                 <argument>5555</argument>
-                <argument>${org.honton.chas.datadog.apm.examples:j2ee-server:war}</argument>
+                <argument>../../j2ee-server/target/j2ee-server-${project.version}.war</argument>
               </arguments>
             </configuration>
           </execution>
@@ -158,16 +145,31 @@
         </executions>
       </plugin>
 
-      <!-- locate dependencies so we can launch mock server  -->
+      <!-- copy dependencies so we can launch mock server  -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
           <execution>
-            <id>locate-dependencies</id>
+            <id>copy-dependency</id>
             <goals>
-              <goal>properties</goal>
+              <goal>copy</goal>
             </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.mock-server</groupId>
+                  <artifactId>mockserver-netty</artifactId>
+                  <classifier>jar-with-dependencies</classifier>
+                  <version>${mockserver.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.eclipse.jetty</groupId>
+                  <artifactId>jetty-runner</artifactId>
+                  <version>${jetty.version}</version>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -185,48 +187,6 @@
           </execution>
         </executions>
       </plugin>
-
-      <!-- start/stop the jetty server -->
-      <!-- plugin>
-        <groupId>org.eclipse.jetty</groupId>
-        <artifactId>jetty-maven-plugin</artifactId>
-        <version>${jetty.version}</version>
-        <configuration>
-          <scanIntervalSeconds>5</scanIntervalSeconds>
-          <stopKey>STOP</stopKey>
-          <stopPort>9999</stopPort>
-          <httpConnector>
-            <port>5555</port>
-          </httpConnector>
-        </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-http</artifactId>
-            <version>${jetty.version}</version>
-          </dependency>
-        </dependencies>
-        <executions>
-          <execution>
-            <id>start-jetty</id>
-            <goals>
-              <goal>deploy-war</goal>
-            </goals>
-            <phase>pre-integration-test</phase>
-            <configuration>
-              <war>${org.honton.chas.datadog.apm.examples:j2ee-server:war}</war>
-              <daemon>true</daemon>
-            </configuration>
-          </execution>
-          <execution>
-            <id>stop-jetty</id>
-            <goals>
-              <goal>stop</goal>
-            </goals>
-            <phase>post-integration-test</phase>
-          </execution>
-        </executions>
-      </plugin -->
 
     </plugins>
   </build>
