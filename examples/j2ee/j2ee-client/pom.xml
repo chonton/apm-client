@@ -4,12 +4,12 @@
 
   <parent>
     <groupId>org.honton.chas.datadog.apm.examples</groupId>
-    <artifactId>embedded</artifactId>
+    <artifactId>j2ee</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
-  <artifactId>embedded-client</artifactId>
+  <artifactId>j2ee-client</artifactId>
 
   <dependencies>
 
@@ -48,8 +48,15 @@
 
     <dependency>
       <groupId>org.honton.chas.datadog.apm.examples</groupId>
-      <artifactId>embedded-api</artifactId>
+      <artifactId>j2ee-api</artifactId>
       <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.honton.chas.datadog.apm.examples</groupId>
+      <artifactId>j2ee-server</artifactId>
+      <version>${project.version}</version>
+      <type>war</type>
     </dependency>
 
     <dependency>
@@ -82,12 +89,18 @@
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-runner</artifactId>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
     <plugins>
 
-      <!-- for integration testing start and stop mock server and executable jar -->
+      <!-- start/stop the mock and jetty servers -->
       <plugin>
         <groupId>com.bazaarvoice.maven.plugins</groupId>
         <artifactId>process-exec-maven-plugin</artifactId>
@@ -113,22 +126,24 @@
             </configuration>
           </execution>
 
-          <!-- start the executable jar -->
+          <!-- start the jetty server -->
           <execution>
-            <id>example-server</id>
+            <id>jetty-web-server</id>
             <goals>
               <goal>start</goal>
             </goals>
             <phase>pre-integration-test</phase>
             <configuration>
-              <name>example-server</name>
+             <name>example-server</name>
               <healthcheckUrl>http://127.0.0.1:5555/health</healthcheckUrl>
               <waitAfterLaunch>5</waitAfterLaunch>
-              <workingDir>../../embedded-server/target/</workingDir>
               <arguments>
                 <argument>${java.home}/bin/java</argument>
                 <argument>-jar</argument>
-                <argument>embedded-server-${project.version}.jar</argument>
+                <argument>${org.eclipse.jetty:jetty-runner:jar}</argument>
+                <argument>--port</argument>
+                <argument>5555</argument>
+                <argument>${org.honton.chas.datadog.apm.examples:j2ee-server:war}</argument>
               </arguments>
             </configuration>
           </execution>
@@ -170,6 +185,48 @@
           </execution>
         </executions>
       </plugin>
+
+      <!-- start/stop the jetty server -->
+      <!-- plugin>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-maven-plugin</artifactId>
+        <version>${jetty.version}</version>
+        <configuration>
+          <scanIntervalSeconds>5</scanIntervalSeconds>
+          <stopKey>STOP</stopKey>
+          <stopPort>9999</stopPort>
+          <httpConnector>
+            <port>5555</port>
+          </httpConnector>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-http</artifactId>
+            <version>${jetty.version}</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <id>start-jetty</id>
+            <goals>
+              <goal>deploy-war</goal>
+            </goals>
+            <phase>pre-integration-test</phase>
+            <configuration>
+              <war>${org.honton.chas.datadog.apm.examples:j2ee-server:war}</war>
+              <daemon>true</daemon>
+            </configuration>
+          </execution>
+          <execution>
+            <id>stop-jetty</id>
+            <goals>
+              <goal>stop</goal>
+            </goals>
+            <phase>post-integration-test</phase>
+          </execution>
+        </executions>
+      </plugin -->
 
     </plugins>
   </build>

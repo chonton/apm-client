@@ -60,6 +60,9 @@ public class HelloIT {
 
     HttpRequest v2traces = HttpRequest.request().withMethod("PUT").withPath("/v0.2/traces");
     HttpRequest[] requests = new MockServerClient("localhost", APM_PORT).retrieveRecordedRequests(v2traces);
+    for(HttpRequest request : requests) {
+      System.out.println(request);
+    }
     Assert.assertEquals(3, requests.length);
 
     Span intercepted = null;

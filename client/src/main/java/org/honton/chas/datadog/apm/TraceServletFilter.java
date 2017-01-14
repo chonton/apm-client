@@ -17,7 +17,7 @@ import org.honton.chas.datadog.apm.Tracer.HeaderAccessor;
 /**
  * Trace import for http requests
  */
-@WebFilter("/")
+@WebFilter("/*")
 public class TraceServletFilter implements Filter {
 
   private Tracer tracer;
