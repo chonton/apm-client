@@ -5,10 +5,14 @@ A java client to push TCP messages to a Datadog APM collector.
 * Minimal latency in the mainline processing
 * Some, but not extreme, buffering of outgoing messages
 * Thread-safe sender
-* Lack of APM collector will be noted, but not cause failure of mainline processing
+* Lack of APM collector will be logged, but not cause failure of mainline processing
 
 ### Assumptions
-* A local (on the same host) APM collector
+* Minimum of Java 7
+* Local (on the same host) APM collector
+* CDI implementation such as Weld
+* Slf4J compliant logging implementation such as Logback
+* Jax-Rs client for optional support of exporting traces
 
 ## Maven Coordinates
 To include apm-client in your maven build, use the following fragment in your pom.
@@ -24,21 +28,135 @@ To include apm-client in your maven build, use the following fragment in your po
   </build>
 ```
 
-## Use with CDI
-Use CDI to intercept bean invocations or to inject the Tracer for programmatic use.
+## Configuration
+To configure apm-client, you must supply a CDI factory method which produces a TraceConfiguration
+instance.  Three attributes are configured:
+* The service name reported with each span sent to Datadog APM collector.
+* The URL of the local Datadog APM collector.
+* The number of milliseconds to backoff.
 
-### Use TraceOperation annotation to report bean invocations without application code.
+After any communication failure, the apm-client logs the failure and will not further attempt to 
+send span information for the backoff period.  During this period all spans are dropped.
+
 ```java
-  @TraceOperation
-  public class ExampleBean {
+public class TraceConfigurationFactory {
+  
+  /**
+   * Get the configuration.
+   * @return The configuration
+   */
+  @Produces
+  static TraceConfiguration getDefault() {
+    return new TraceConfiguration(
+      "service-name",       // service name
+      "http://localhost:7777",  // apm collector url
+      TimeUnit.MINUTES.toMillis(1));  // backoff period
+  }
+}
+```
 
+## TraceServletFilter
+The TraceServletFilter traces every incoming request.  If the client request includes the
+**x-ddtrace-parent_trace_id** and **x-ddtrace-parent_span_id** headers, that indicated span is used as
+the parent trace and span.  Otherwise, a new trace is created.  Once the request is complete, the
+new span or trace is closed and sent to Datadog APM.
+
+### Registration in War
+Register TraceServletFilter, weld, and Jax-Rs application in the web.xml:
+
+```xml
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+  version="3.1">
+  
+  <!-- servlet filter -->
+  <filter>
+    <filter-class>org.honton.chas.datadog.apm.servlet.TraceServletFilter</filter-class>
+  </filter>
+  
+  <!-- CDI implementation -->
+  <listener>
+    <listener-class>org.jboss.weld.environment.servlet.Listener</listener-class>
+  </listener>
+  
+  <!-- Application -->
+  <servlet>
+    <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+    <init-param>
+      <param-name>javax.ws.rs.Application</param-name>
+      <param-value>org.honton.chas.datadog.apm.example.server.HelloApplication</param-value>
+    </init-param>
+  </servlet>
+  
+</web-app>
+```
+
+### or Registration with embedded Jetty
+```java
+  public HelloMain(int port) {
+    this.port = port;
+  
+    context = new ServletContextHandler();
+    context.setContextPath("/");
+  
+    // Use Weld to inject into servlets
+    context.addEventListener(new org.jboss.weld.environment.servlet.Listener());
+  
+    // Add the Tracing Filter
+    context.addFilter(TraceServletFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
+  
+    jettyServer = new Server(port);
+    jettyServer.setHandler(context);
+  
+    addJaxRsApplication(HelloApplication.class);
+    start();
+  }
+```
+
+## TraceClientFilter
+TraceClientFilter exports outgoing requests.  Prior to sending the request, a new span is created.
+The outgoing requests includes **x-ddtrace-parent_trace_id** and **x-ddtrace-parent_span_id** headers
+indicating that new span.  Once the request has completed, the span is closed and sent to Datadog APM.
+
+### Register TraceClientFilter with JaxRS to report outgoing requests (and propagate x-ddtrace- headers)
+
+```java
+public class ProxyFactory {
+
+  private ResteasyClientBuilder clientBuilder;
+
+  @Inject
+  void setTraceFilter(TraceClientFilter filter) {
+    clientBuilder = new ResteasyClientBuilder();
+    clientBuilder.register(filter);
+  }
+
+  public <T> T getProxy(String url, Class<T> cls) {
+    return clientBuilder.build().target(url).proxy(cls);
+  }
+}
+```
+
+## TraceInterceptor
+The TraceOperation annotation instructs TraceInterceptor to create a new span is before entering a
+CDI bean operation and close the span once the operation is complete.  Completed spans are sent to 
+Datadog APM.  The TraceOperation annotation can be placed on the class or the method definition.
+Placing the annotation on a method will cause any invocation from outside the class to be traced. 
+Placing the annotation on a class will cause all methods in that class to be traced, unless the
+method is annotated with **@TraceOperation(false)**.
+```java
+@TraceOperation
+public class ExampleBean {
+  
   /**
    * Trace turned on at class level
    */
   public void methodToTrace() {
     // ...
   }
-
+  
   /**
    * Trace turned off at method level
    */
@@ -49,51 +167,18 @@ Use CDI to intercept bean invocations or to inject the Tracer for programmatic u
 }
 ```
 
-#### Inject the Tracer to report spans with application code.
+## Tracer
+Similarly, application code can use the Tracer create a new span is before entering a Callable or
+Runnable and close the spans once the calls are complete.  Completed spans are immediately
+queued to send to Datadog APM.  Inject the Tracer to report spans with application code.
 ```java
-
   @Inject
   private Tracer tracer;
-
-```
-
-## Typical Jax-RS Use
-
-### Register TraceContainerFilter with JaxRS to report incoming requests
-```java
-  @ApplicationPath("/")
-  public class ExampleApplication extends Application {
-    /**
-     * Register provider instances
-     */
-    @Override
-    public Set<Object> getSingletons() {
-      Set<Object> singletons = new HashSet<>();
-      // Register the Tracing filter
-      singletons.add(new TraceContainerFilter());
-      return singletons;
-    }
+  
+  public String someMethod() {
+    return tracer.executeCallable("resource", "operation", () -> {  
+      // code to run inside span
+      return "returnValue";
+    });
   }
-```
-
-### Register TraceClientFilter with JaxRS to report outgoing requests (and propagate x-ddtrace- headers)
-```java
-  /**
-   * Create a JaxRs Client with registered TraceClientFilter
-   */
-  public Client createClient() {
-    return ClientBuilder.newBuilder()
-        .register(TraceClientFilter.class)
-        .build();
-  }
-```
-
-## Functional Java Use
-```java
-
-  String rc = tracer.executeCallable("resource", "operation", () -> {
-    // code to run inside span
-    return "returnValue";
-  });
-
 ```
