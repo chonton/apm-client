@@ -121,7 +121,7 @@
             </goals>
             <phase>pre-integration-test</phase>
             <configuration>
-             <name>example-server</name>
+              <name>example-server</name>
               <healthcheckUrl>http://127.0.0.1:5555/health</healthcheckUrl>
               <waitAfterLaunch>5</waitAfterLaunch>
               <arguments>

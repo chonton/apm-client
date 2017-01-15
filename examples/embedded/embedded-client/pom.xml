@@ -149,10 +149,10 @@
             <configuration>
               <artifactItems>
                 <artifactItem>
-                    <groupId>org.mock-server</groupId>
-                    <artifactId>mockserver-netty</artifactId>
-                    <classifier>jar-with-dependencies</classifier>
-                    <version>${mockserver.version}</version>
+                  <groupId>org.mock-server</groupId>
+                  <artifactId>mockserver-netty</artifactId>
+                  <classifier>jar-with-dependencies</classifier>
+                  <version>${mockserver.version}</version>
                 </artifactItem>
               </artifactItems>
             </configuration>
