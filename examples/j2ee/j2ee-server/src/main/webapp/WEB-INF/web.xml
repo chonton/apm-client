@@ -5,7 +5,7 @@
   version="3.1">
 
   <filter>
-    <filter-class>org.honton.chas.datadog.apm.TraceServletFilter</filter-class>
+    <filter-class>org.honton.chas.datadog.apm.servlet.TraceServletFilter</filter-class>
   </filter>
 
   <listener>

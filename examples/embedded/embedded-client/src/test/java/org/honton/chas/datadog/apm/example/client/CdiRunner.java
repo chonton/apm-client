@@ -6,7 +6,7 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.InitializationError;
 
 /**
- * Unit test runner to for CDI.
+ * Unit test runner for CDI.
  */
 public class CdiRunner extends BlockJUnit4ClassRunner {
 

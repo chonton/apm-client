@@ -1,4 +1,4 @@
-package org.honton.chas.datadog.apm;
+package org.honton.chas.datadog.apm.jaxrs;
 
 import java.io.IOException;
 import java.net.URI;
@@ -7,7 +7,7 @@ import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.client.ClientResponseFilter;
-import org.honton.chas.datadog.apm.Tracer.HeaderMutator;
+import org.honton.chas.datadog.apm.Tracer;
 
 /**
  * Trace export for jaxrs implementations
@@ -15,14 +15,21 @@ import org.honton.chas.datadog.apm.Tracer.HeaderMutator;
 public class TraceClientFilter
   implements ClientRequestFilter, ClientResponseFilter {
 
-  @Inject Tracer tracer;
+  private Tracer tracer;
 
-  @Override public void filter(final ClientRequestContext requestContext) throws IOException {
+  @Inject
+  void setTracer(Tracer tracer) {
+    this.tracer = tracer;
+  }
+
+  @Override
+  public void filter(final ClientRequestContext requestContext) throws IOException {
     URI uri = requestContext.getUri();
     tracer.exportSpan(uri.getHost() + ':' + uri.getPort(),
     requestContext.getMethod() + ':' + uri.getPath().toLowerCase(),
-      new HeaderMutator() {
-        @Override public void setValue(String name, String value) {
+      new Tracer.HeaderMutator() {
+        @Override
+        public void setValue(String name, String value) {
           requestContext.getHeaders().putSingle(name, value);
         }
       });

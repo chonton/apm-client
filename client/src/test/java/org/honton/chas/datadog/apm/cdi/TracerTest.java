@@ -1,6 +1,7 @@
-package org.honton.chas.datadog.apm;
+package org.honton.chas.datadog.apm.cdi;
 
-import org.honton.chas.datadog.apm.cdi.TracerImpl;
+import org.honton.chas.datadog.apm.SpanBuilder;
+import org.honton.chas.datadog.apm.TraceConfigurationFactory;
 import org.junit.Assert;
 import org.junit.Test;
 

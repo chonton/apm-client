@@ -1,7 +1,7 @@
 package org.honton.chas.datadog.apm.example.client;
 
 import javax.inject.Inject;
-import org.honton.chas.datadog.apm.TraceClientFilter;
+import org.honton.chas.datadog.apm.jaxrs.TraceClientFilter;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 
 public class ProxyFactory {

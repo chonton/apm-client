@@ -1,13 +1,12 @@
-package org.honton.chas.datadog.apm;
+package org.honton.chas.datadog.apm.cdi;
 
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.concurrent.Callable;
-
+import org.honton.chas.datadog.apm.TraceConfigurationFactory;
 import org.honton.chas.datadog.apm.api.Span;
-import org.honton.chas.datadog.apm.cdi.TracerImpl;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

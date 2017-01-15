@@ -1,4 +1,4 @@
-package org.honton.chas.datadog.apm;
+package org.honton.chas.datadog.apm.servlet;
 
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -12,7 +12,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.honton.chas.datadog.apm.Tracer.HeaderAccessor;
+import org.honton.chas.datadog.apm.SpanBuilder;
+import org.honton.chas.datadog.apm.Tracer;
 
 /**
  * Trace import for http requests
@@ -38,8 +39,9 @@ public class TraceServletFilter implements Filter {
     final HttpServletRequest req = (HttpServletRequest) request;
     final HttpServletResponse resp = (HttpServletResponse) response;
 
-    SpanBuilder sb = tracer.importSpan(new HeaderAccessor() {
-      @Override public String getValue(String name) {
+    SpanBuilder sb = tracer.importSpan(new Tracer.HeaderAccessor() {
+      @Override
+      public String getValue(String name) {
         return req.getHeader(name);
       }
     });

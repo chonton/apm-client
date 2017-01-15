@@ -1,4 +1,4 @@
 /**
- * Created by chas on 1/14/17.
+ * Classes that define the REST api of Datadog APM collector.
  */
 package org.honton.chas.datadog.apm.api;

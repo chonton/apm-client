@@ -20,7 +20,7 @@ public class TraceConfiguration {
   private String collectorUrl;
 
   /**
-   * The number of milliseconds that collection is quenched after collection failure
+   * The number of milliseconds that collection is squelched after communication failure
    */
   private long backoffDuration;
 }

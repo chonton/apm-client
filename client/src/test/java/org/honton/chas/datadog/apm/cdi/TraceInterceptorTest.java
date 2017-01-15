@@ -1,9 +1,10 @@
-package org.honton.chas.datadog.apm;
+package org.honton.chas.datadog.apm.cdi;
 
 import java.lang.reflect.Method;
 
 import javax.interceptor.InvocationContext;
 
+import org.honton.chas.datadog.apm.TraceConfigurationFactory;
 import org.honton.chas.datadog.apm.api.Span;
 import org.honton.chas.datadog.apm.cdi.TraceInterceptor;
 import org.honton.chas.datadog.apm.cdi.TracerImpl;

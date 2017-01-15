@@ -1,10 +1,13 @@
-package org.honton.chas.datadog.apm;
+package org.honton.chas.datadog.apm.cdi;
 
 import java.util.concurrent.Callable;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.honton.chas.datadog.apm.SpanBuilder;
+import org.honton.chas.datadog.apm.TraceConfiguration;
+import org.honton.chas.datadog.apm.Tracer;
 import org.honton.chas.datadog.apm.api.Span;
 import org.honton.chas.datadog.apm.sender.Writer;
 
@@ -12,22 +15,11 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Tracer which acts as span factory.
+ * TracerImpl which acts as span factory.
  */
 @ApplicationScoped
 @Slf4j
-public class Tracer {
-
-  interface HeaderAccessor {
-    String getValue(String name);
-  }
-
-  interface HeaderMutator {
-    void setValue(String name, String value);
-  }
-
-  static final String SPAN_ID = "x-ddtrace-parent_span_id";
-  static final String TRACE_ID = "x-ddtrace-parent_trace_id";
+public class TracerImpl implements Tracer {
 
   private final ThreadLocal<SpanBuilder> currentSpan = new ThreadLocal<>();
 
@@ -49,6 +41,7 @@ public class Tracer {
    * @param callable The Callable to invoke
    * @return The value returned from the Callable
    */
+  @Override
   @SneakyThrows
   public <T> T executeCallable(String resource, String operation, Callable<T> callable) {
     SpanBuilder builder = createSpan(resource, operation);
@@ -69,6 +62,7 @@ public class Tracer {
    * @param operation The operation being called
    * @param runnable The runnable to invoke
    */
+  @Override
   @SneakyThrows
   public void executeRunnable(String resource, String operation, Runnable runnable) {
     SpanBuilder builder = createSpan(resource, operation);
@@ -87,6 +81,7 @@ public class Tracer {
    * 
    * @return The current span, or null
    */
+  @Override
   public SpanBuilder getCurrentSpan() {
     return currentSpan.get();
   }
@@ -97,7 +92,8 @@ public class Tracer {
    * @param headerAccessor The function access to headers. Function supplied with header name and
    *        should return the header value.
    */
-  SpanBuilder importSpan(HeaderAccessor headerAccessor) {
+  @Override
+  public SpanBuilder importSpan(HeaderAccessor headerAccessor) {
     SpanBuilder current;
 
     String traceIdHeader = headerAccessor.getValue(TRACE_ID);
@@ -120,7 +116,8 @@ public class Tracer {
    * @param headerAccessor The function access to headers. Function supplied with header name and
    *        value.
    */
-  void exportSpan(String resource, String operation, HeaderMutator headerAccessor) {
+  @Override
+  public void exportSpan(String resource, String operation, HeaderMutator headerAccessor) {
     SpanBuilder span = createSpan(resource, operation).type("http");
     headerAccessor.setValue(TRACE_ID, Long.toHexString(span.traceId()));
     headerAccessor.setValue(SPAN_ID, Long.toHexString(span.spanId()));
@@ -132,7 +129,8 @@ public class Tracer {
    * 
    * @return The child span, to be filled with resource and operation.
    */
-  SpanBuilder createSpan() {
+  @Override
+  public SpanBuilder createSpan() {
     SpanBuilder parent = currentSpan.get();
     SpanBuilder span = parent == null ? SpanBuilder.createRoot() : parent.createChild();
     currentSpan.set(span);
@@ -142,7 +140,8 @@ public class Tracer {
   /**
    * Finish the current span and restore the current span's parent as the current span
    */
-  void closeCurrentSpan() {
+  @Override
+  public void closeCurrentSpan() {
     closeSpan(currentSpan.get());
   }
 
@@ -152,7 +151,8 @@ public class Tracer {
    * 
    * @param current The currently active span
    */
-  void closeSpan(SpanBuilder current) {
+  @Override
+  public void closeSpan(SpanBuilder current) {
     try {
       currentSpan.set(current.parent());
       Span span = current.finishSpan(service);

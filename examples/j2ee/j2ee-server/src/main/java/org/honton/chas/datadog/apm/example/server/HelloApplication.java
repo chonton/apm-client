@@ -22,7 +22,7 @@ public class HelloApplication extends Application {
     // Register the infrastructure endpoint
     classes.add(HealthService.class);
 
-    // the Tracing filter is added in HelloMain
+    // the Tracing filter is added in web.xml
 
     return classes;
   }

@@ -1,4 +1,4 @@
 /**
- * Created by chas on 1/14/17.
+ * Classes to send the spans to Datadog APM collector.
  */
 package org.honton.chas.datadog.apm.sender;

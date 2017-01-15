@@ -1,4 +1,4 @@
-package org.honton.chas.datadog.apm;
+package org.honton.chas.datadog.apm.servlet;
 
 import java.io.IOException;
 import javax.servlet.FilterChain;
@@ -7,27 +7,21 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.honton.chas.datadog.apm.SpanBuilder;
 import org.honton.chas.datadog.apm.api.Span;
 import org.honton.chas.datadog.apm.cdi.TracerImpl;
-import org.honton.chas.datadog.apm.servlet.TraceServletFilter;
+import org.honton.chas.datadog.apm.cdi.TracerTestImpl;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 public class TraceServletFilterTest {
 
-  private Span span;
   private SpanBuilder activeInFilter;
 
-  private void test(String clientTraceId, String clientSpanId, int statusCode) throws IOException, ServletException {
+  private Span test(String clientTraceId, String clientSpanId, int statusCode) throws IOException, ServletException {
 
-    final TracerImpl tracer = new TracerImpl() {
-        @Override
-        void queueSpan(Span qs) {
-            span = qs;
-        }
-    };
-    tracer.setTraceConfiguration(TraceConfigurationFactory.DEFAULTS);
+    final TracerTestImpl tracer = new TracerTestImpl();
 
     TraceServletFilter tsf = new TraceServletFilter();
     tsf.setTracer(tracer);
@@ -58,14 +52,16 @@ public class TraceServletFilterTest {
 
     Assert.assertNotNull(activeInFilter);
 
+    Span span = tracer.getCapturedSpan();
     Assert.assertEquals("service", span.getService());
     Assert.assertEquals("example.com:7110", span.getResource());
     Assert.assertEquals("GET:/some/path", span.getOperation());
+    return span;
   }
 
   @Test
   public void testNoClientTrace() throws IOException, ServletException {
-    test(null, null, 200);
+    Span span = test(null, null, 200);
     Assert.assertEquals(span.getTraceId(), span.getSpanId());
     Assert.assertNull(span.getParentId());
     Assert.assertEquals(0, span.getError());
@@ -73,7 +69,7 @@ public class TraceServletFilterTest {
 
   @Test
   public void testWithClientTrace() throws IOException, ServletException {
-    test("fdfd", "5a5a", 400);
+    Span span = test("fdfd", "5a5a", 400);
     Assert.assertEquals(0xfdfdL, span.getTraceId());
     Assert.assertEquals(0x5a5aL, span.getParentId().longValue());
     Assert.assertEquals(400, span.getError());

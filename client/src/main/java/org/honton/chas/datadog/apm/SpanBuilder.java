@@ -133,7 +133,7 @@ public class SpanBuilder {
    * Create a child of this span
    * @return The child span
    */
-  SpanBuilder createChild() {
+  public SpanBuilder createChild() {
     return new SpanBuilder(this, traceId, spanId, createId());
   }
 
@@ -141,7 +141,7 @@ public class SpanBuilder {
    * Create a builder for a root span.
    * @return A builder for a root span
    */
-  static SpanBuilder createRoot() {
+  public static SpanBuilder createRoot() {
     long traceId = createId();
     return new SpanBuilder(null, traceId, null, traceId);
   }
@@ -152,7 +152,7 @@ public class SpanBuilder {
    * @param parentSpanId The id of the parent span
    * @return
    */
-  static SpanBuilder createChild(long traceId, long parentSpanId) {
+  public static SpanBuilder createChild(long traceId, long parentSpanId) {
     return new SpanBuilder(null, traceId, parentSpanId, createId());
   }
 
@@ -161,7 +161,7 @@ public class SpanBuilder {
    * @param service The service value
    * @return The immutable Span that was completed
    */
-  Span finishSpan(String service) {
+  public Span finishSpan(String service) {
     return new Span(service, resource, operation,
         traceId, parentId, spanId, type,
         meta != null ? copyOf(meta) : null,
