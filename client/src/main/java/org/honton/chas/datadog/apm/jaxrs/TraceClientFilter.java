@@ -2,7 +2,6 @@ package org.honton.chas.datadog.apm;
 
 import java.io.IOException;
 import java.net.URI;
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
@@ -13,7 +12,7 @@ import org.honton.chas.datadog.apm.Tracer.HeaderMutator;
 /**
  * Trace export for jaxrs implementations
  */
-@ApplicationScoped public class TraceClientFilter
+public class TraceClientFilter
   implements ClientRequestFilter, ClientResponseFilter {
 
   @Inject Tracer tracer;

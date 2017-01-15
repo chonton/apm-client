@@ -5,6 +5,8 @@ import java.lang.reflect.Method;
 import javax.interceptor.InvocationContext;
 
 import org.honton.chas.datadog.apm.api.Span;
+import org.honton.chas.datadog.apm.cdi.TraceInterceptor;
+import org.honton.chas.datadog.apm.cdi.TracerImpl;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -15,7 +17,7 @@ public class TraceInterceptorTest {
 
   private void test(Object response) throws Exception {
 
-    Tracer tracer = new Tracer() {
+    TracerImpl tracer = new TracerImpl() {
       @Override
       void queueSpan(Span qs) {
         span = qs;

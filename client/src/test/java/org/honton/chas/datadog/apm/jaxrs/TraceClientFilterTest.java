@@ -10,6 +10,8 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
 import org.honton.chas.datadog.apm.api.Span;
+import org.honton.chas.datadog.apm.cdi.TracerImpl;
+import org.honton.chas.datadog.apm.jaxrs.TraceClientFilter;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -21,7 +23,7 @@ public class TraceClientFilterTest {
   @Test
   public void test() throws URISyntaxException, IOException {
 
-    Tracer tracer = new Tracer() {
+    TracerImpl tracer = new TracerImpl() {
       @Override
       void queueSpan(Span qs) {
         span = qs;
@@ -48,8 +50,8 @@ public class TraceClientFilterTest {
     Assert.assertEquals("service", span.getService());
     Assert.assertEquals("example.com:7110", span.getResource());
     Assert.assertEquals("GET:/some/path", span.getOperation());
-    Assert.assertEquals(Long.parseUnsignedLong((String)headerAccess.getFirst(Tracer.TRACE_ID), 16), span.getTraceId());
-    Assert.assertEquals(Long.parseUnsignedLong((String)headerAccess.getFirst(Tracer.SPAN_ID), 16), span.getSpanId());
+    Assert.assertEquals(Long.parseUnsignedLong((String)headerAccess.getFirst(TracerImpl.TRACE_ID), 16), span.getTraceId());
+    Assert.assertEquals(Long.parseUnsignedLong((String)headerAccess.getFirst(TracerImpl.SPAN_ID), 16), span.getSpanId());
   }
 
 }

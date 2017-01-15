@@ -8,6 +8,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.honton.chas.datadog.apm.api.Span;
+import org.honton.chas.datadog.apm.cdi.TracerImpl;
+import org.honton.chas.datadog.apm.servlet.TraceServletFilter;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -19,7 +21,7 @@ public class TraceServletFilterTest {
 
   private void test(String clientTraceId, String clientSpanId, int statusCode) throws IOException, ServletException {
 
-    final Tracer tracer = new Tracer() {
+    final TracerImpl tracer = new TracerImpl() {
         @Override
         void queueSpan(Span qs) {
             span = qs;
@@ -38,8 +40,8 @@ public class TraceServletFilterTest {
     Mockito.when(req.getRequestURI()).thenReturn("/some/path");
     Mockito.when(req.getScheme()).thenReturn("https");
 
-    Mockito.when(req.getHeader(Mockito.eq(Tracer.SPAN_ID))).thenReturn(clientSpanId);
-    Mockito.when(req.getHeader(Mockito.eq(Tracer.TRACE_ID))).thenReturn(clientTraceId);
+    Mockito.when(req.getHeader(Mockito.eq(TracerImpl.SPAN_ID))).thenReturn(clientSpanId);
+    Mockito.when(req.getHeader(Mockito.eq(TracerImpl.TRACE_ID))).thenReturn(clientTraceId);
 
     HttpServletResponse resp = Mockito.mock(HttpServletResponse.class);
     Mockito.when(resp.getStatus()).thenReturn(statusCode);

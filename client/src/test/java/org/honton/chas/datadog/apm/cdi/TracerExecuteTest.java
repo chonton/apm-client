@@ -7,6 +7,7 @@ import java.net.URISyntaxException;
 import java.util.concurrent.Callable;
 
 import org.honton.chas.datadog.apm.api.Span;
+import org.honton.chas.datadog.apm.cdi.TracerImpl;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -15,12 +16,12 @@ import org.junit.Test;
 public class TracerExecuteTest {
 
   private Span span;
-  private Tracer tracer;
+  private TracerImpl tracer;
   private boolean wasRun;
 
   @Before
   public void setupTracer() {
-    tracer = new Tracer() {
+    tracer = new TracerImpl() {
       @Override
       void queueSpan(Span qs) {
         span = qs;
