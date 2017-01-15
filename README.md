@@ -1,5 +1,7 @@
 # apm-client
-A java client to push TCP messages to a Datadog APM collector.
+This java client intercepts servlet requests, jax-rs client requests, and bean methods.  The resource
+and method names as well as the wall time and duration of the request are recorded in spans.  These
+spans are queued and sent as REST messages to a [Datadog APM collector](https://www.datadoghq.com/apm/).
 
 ### Requirements
 * Minimal latency in the mainline processing
@@ -10,9 +12,9 @@ A java client to push TCP messages to a Datadog APM collector.
 ### Assumptions
 * Minimum of Java 7
 * Local (on the same host) APM collector
-* CDI implementation such as Weld
-* Slf4J compliant logging implementation such as Logback
-* Jax-Rs client for optional support of exporting traces
+* [CDI](http://www.cdi-spec.org/) implementation such as [Weld](http://weld.cdi-spec.org/)
+* [Slf4J](https://www.slf4j.org/) compliant logging implementation such as [Logback](http://logback.qos.ch/)
+* [Jax-Rs](https://jax-rs-spec.java.net/) client for optional support of exporting traces
 
 ## Maven Coordinates
 To include apm-client in your maven build, use the following fragment in your pom.
