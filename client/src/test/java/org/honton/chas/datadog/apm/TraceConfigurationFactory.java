@@ -10,11 +10,11 @@ public class TraceConfigurationFactory {
 
   public static final TraceConfiguration DEFAULTS = new TraceConfiguration(
         "service",
-          "http://localhost:7777",
+          "http://localhost:1", // no-one should be listening to this port
     TimeUnit.MINUTES.toMillis(15));
 
   /**
-   * Get the default configuration.  Only called if CDI does not find any other Producer.
+   * Get the default configuration.
    * @return The default configuration
    */
   @Produces

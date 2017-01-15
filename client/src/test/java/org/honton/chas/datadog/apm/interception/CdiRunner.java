@@ -1,4 +1,4 @@
-package org.honton.chas.datadog.apm;
+package org.honton.chas.datadog.apm.interception;
 
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
