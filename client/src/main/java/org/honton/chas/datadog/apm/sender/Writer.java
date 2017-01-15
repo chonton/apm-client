@@ -74,14 +74,12 @@ public class Writer {
    *
    * @return false, if worker worker has been shutdown
    */
-  boolean consumeAndSend() {
+  List<Trace> consumeAndSend() {
     try {
-      trySend(queue.consume());
-      return true;
+      return queue.consume();
     } catch (InterruptedException ie) {
       queue = null;
-      log.error("writer worker shutdown");
-      return false;
+      return null;
     }
   }
 
@@ -124,7 +122,13 @@ public class Writer {
 
       @Override
       public void run() {
-        while (consumeAndSend()) {
+        for(;;) {
+          List<Trace> traces = consumeAndSend();
+          if(traces == null) {
+            log.error("writer worker shutdown");
+            break;
+          }
+          trySend(traces);
         }
       }
     };

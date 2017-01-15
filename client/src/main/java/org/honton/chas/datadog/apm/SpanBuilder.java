@@ -150,7 +150,7 @@ public class SpanBuilder {
    * Create a builder for a span which is a child of another span.
    * @param traceId The id of the trace
    * @param parentSpanId The id of the parent span
-   * @return
+   * @return The span which is a child the the imported span.
    */
   public static SpanBuilder createChild(long traceId, long parentSpanId) {
     return new SpanBuilder(null, traceId, parentSpanId, createId());

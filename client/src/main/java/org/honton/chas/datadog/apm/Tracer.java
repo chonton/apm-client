@@ -42,6 +42,7 @@ public interface Tracer {
    *
    * @param headerAccessor The function access to headers. Function supplied with header name and
    *        should return the header value.
+   * @return The SpanBuilder which is a child of the imported span.
    */
   SpanBuilder importSpan(HeaderAccessor headerAccessor);
 

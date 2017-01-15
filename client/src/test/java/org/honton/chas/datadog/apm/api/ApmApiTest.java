@@ -3,9 +3,7 @@ package org.honton.chas.datadog.apm.api;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 import javax.ws.rs.client.WebTarget;
-
 import org.honton.chas.datadog.apm.SpanBuilderTest;
 import org.honton.chas.datadog.apm.jackson.MsgPackProvider;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
@@ -14,7 +12,6 @@ import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
@@ -58,7 +55,6 @@ public class ApmApiTest {
     return rtarget.proxy(proxyType);
   }
 
-  @Ignore
   @Test
   public void testService0_2() {
     ApmApi0_2 apmApi = getProxy(ApmApi0_2.class);

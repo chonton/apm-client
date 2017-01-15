@@ -32,7 +32,7 @@ public interface ApmApi {
   /**
    * Report an ordered collection of traces.
    * 
-   * @param traces
+   * @param traces The collection of traces to send to Datadog APM
    * @return result of PUT, usually {@link #SUCCESS}
    */
   @PUT

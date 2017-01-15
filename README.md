@@ -3,6 +3,8 @@ This java client intercepts servlet requests, jax-rs client requests, and bean m
 and method names as well as the wall time and duration of the request are recorded in spans.  These
 spans are queued and sent as REST messages to a [Datadog APM collector](https://www.datadoghq.com/apm/).
 
+[Javadoc](https://chonton.github.io/apm-client/apidocs/index.html) and [build reports](https://chonton.github.io/apm-client/project-reports.html) are available.
+
 ### Requirements
 * Minimal latency in the mainline processing
 * Some, but not extreme, buffering of outgoing messages
@@ -121,8 +123,6 @@ Register TraceServletFilter, weld, and Jax-Rs application in the web.xml:
 TraceClientFilter exports outgoing requests.  Prior to sending the request, a new span is created.
 The outgoing requests includes **x-ddtrace-parent_trace_id** and **x-ddtrace-parent_span_id** headers
 indicating that new span.  Once the request has completed, the span is closed and sent to Datadog APM.
-
-### Register TraceClientFilter with JaxRS to report outgoing requests (and propagate x-ddtrace- headers)
 
 ```java
 public class ProxyFactory {
