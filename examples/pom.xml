@@ -11,7 +11,10 @@
 
   <groupId>org.honton.chas.datadog.apm.examples</groupId>
   <artifactId>examples</artifactId>
+  <name>${artifactId}</name>
+
   <packaging>pom</packaging>
+  <description>Examples using Java Client for Datadog APM</description>
 
   <modules>
     <module>embedded</module>

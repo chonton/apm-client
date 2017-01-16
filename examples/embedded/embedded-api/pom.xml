@@ -10,6 +10,8 @@
   </parent>
 
   <artifactId>embedded-api</artifactId>
+  <name>${artifactId}</name>
+  <description>Api for Example</description>
 
   <dependencies>
 

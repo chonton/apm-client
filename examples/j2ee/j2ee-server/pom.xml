@@ -10,6 +10,8 @@
   </parent>
 
   <artifactId>j2ee-server</artifactId>
+  <name>${artifactId}</name>
+  <description>War Example Server</description>
   <packaging>war</packaging>
 
   <dependencies>

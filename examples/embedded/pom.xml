@@ -10,7 +10,9 @@
   </parent>
 
   <artifactId>embedded</artifactId>
+  <name>${artifactId}</name>
   <packaging>pom</packaging>
+  <description>Embedded Jetty Example using Java Client for Datadog APM</description>
 
   <modules>
     <module>embedded-api</module>

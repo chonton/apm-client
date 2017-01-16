@@ -10,6 +10,8 @@
   </parent>
 
   <artifactId>embedded-server</artifactId>
+  <name>${artifactId}</name>
+  <description>Embedded Jetty Example Server</description>
 
   <dependencies>
 
