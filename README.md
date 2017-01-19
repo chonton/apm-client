@@ -3,7 +3,7 @@ This java client intercepts servlet requests, jax-rs client requests, and bean m
 and method names as well as the wall time and duration of the request are recorded in spans.  These
 spans are queued and sent as REST messages to a [Datadog APM collector](https://www.datadoghq.com/apm/).
 
-[Javadoc](https://chonton.github.io/apm-client/0.0.1-SNAPSHOT/client/apidocs/index.html) and [build reports](https://chonton.github.io/apm-client/0.0.1-SNAPSHOT/client/project-reports.html) are available.
+[Javadoc](https://chonton.github.io/apm-client/0.0.1/client/apidocs/index.html) and [build reports](https://chonton.github.io/apm-client/0.0.1/client/project-reports.html) are available.
 
 ### Requirements
 * Minimal latency in the mainline processing
@@ -26,7 +26,7 @@ To include apm-client in your maven build, use the following fragment in your po
       <plugin>
         <groupId>org.honton.chas.datadog</groupId>
         <artifactId>apm-client</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.0.1</version>
       </plugin>
     </plugins>
   </build>
