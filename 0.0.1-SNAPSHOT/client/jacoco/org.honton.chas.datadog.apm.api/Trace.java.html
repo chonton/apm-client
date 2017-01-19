@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Trace.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">client</a> &gt; <a href="index.source.html" class="el_package">org.honton.chas.datadog.apm.api</a> &gt; <span class="el_source">Trace.java</span></div><h1>Trace.java</h1><pre class="source lang-java linenums">package org.honton.chas.datadog.apm.api;
+
+import java.util.Arrays;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonValue;
+
+/**
+ * A ordered collection of spans.
+ */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class Trace {
+  private final List&lt;Span&gt; spans;
+
+  @JsonValue
+  public List&lt;Span&gt; getSpans() {
+<span class="fc" id="L19">    return spans;</span>
+  }
+
+  @JsonCreator
+<span class="fc" id="L23">  public Trace(List&lt;Span&gt; spans) {</span>
+<span class="fc" id="L24">    this.spans = spans;</span>
+<span class="fc" id="L25">  }</span>
+
+  public Trace(Span... span) {
+<span class="fc" id="L28">    this(Arrays.asList(span));</span>
+<span class="fc" id="L29">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.7.201606060606</span></div></body></html>
