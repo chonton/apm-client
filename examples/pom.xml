@@ -11,9 +11,9 @@
 
   <groupId>org.honton.chas.datadog.apm.examples</groupId>
   <artifactId>examples</artifactId>
-  <name>${artifactId}</name>
 
   <packaging>pom</packaging>
+  <name>${project.artifactId}</name>
   <description>Examples using Java Client for Datadog APM</description>
 
   <modules>
@@ -22,8 +22,12 @@
   </modules>
 
   <properties>
+    <gpg.skip>true</gpg.skip>
     <!-- don't deploy examples to remote repository -->
     <maven.deploy.skip>true</maven.deploy.skip>
+    <maven.javadoc.skip>true</maven.javadoc.skip>
+    <maven.source.skip>true</maven.source.skip>
+    <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
   </properties>
 
 </project>

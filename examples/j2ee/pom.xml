@@ -10,9 +10,9 @@
   </parent>
 
   <artifactId>j2ee</artifactId>
-  <name>${artifactId}</name>
 
   <packaging>pom</packaging>
+  <name>${project.artifactId}</name>
   <description>J2EE web.xml example using Java Client for Datadog APM</description>
 
   <modules>

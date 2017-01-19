@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>j2ee-api</artifactId>
-  <name>${artifactId}</name>
+  <name>${project.artifactId}</name>
   <description>Api for Example</description>
 
   <dependencies>

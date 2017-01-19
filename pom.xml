@@ -7,8 +7,7 @@
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>${artifactId}</name>
-
+  <name>${project.artifactId}</name>
   <description>Java client for Datadog APM</description>
   <url>https://github.com/chonton/apm-client</url>
   <inceptionYear>2017</inceptionYear>
@@ -54,7 +53,7 @@
 
     <site>
       <id>github</id>
-      <url>https://github.com/chonton/apm-client</url>
+      <url>https://chonton.github.com/apm-client/${project.version}</url>
     </site>
   </distributionManagement>
 
@@ -70,6 +69,10 @@
     <lombok.version>1.16.10</lombok.version>
     <maven.compiler.source>1.7</maven.compiler.source>
     <maven.compiler.target>1.7</maven.compiler.target>
+    <!-- use org.sonatype.plugins:nexus-staging-maven-plugin instead of org.apache.maven.plugins:maven-deploy-plugin -->
+    <maven.deploy.skip>true</maven.deploy.skip>
+    <!-- use com.github.github:site-maven-plugin instead of org.apache.maven.plugins:maven-site-plugin -->
+    <maven.site.deploy.skip>true</maven.site.deploy.skip>
     <mockserver.version>3.10.4</mockserver.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <resteasy.version>3.1.0.Final</resteasy.version>
@@ -378,6 +381,11 @@
           <version>0.7</version>
         </plugin>
         <plugin>
+          <groupId>com.github.github</groupId>
+          <artifactId>site-maven-plugin</artifactId>
+          <version>0.11</version>
+        </plugin>
+        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-clean-plugin</artifactId>
           <version>2.5</version>
@@ -453,6 +461,16 @@
           <version>2.12.4</version>
         </plugin>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-report-plugin</artifactId>
+          <version>2.19.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>1.12</version>
+        </plugin>
+        <plugin>
           <groupId>org.honton.chas</groupId>
           <artifactId>testpojo-maven-plugin</artifactId>
           <version>0.0.5</version>
@@ -467,26 +485,55 @@
           <artifactId>nexus-staging-maven-plugin</artifactId>
           <version>1.6.3</version>
         </plugin>
-        <plugin>
-          <groupId>com.github.github</groupId>
-          <artifactId>site-maven-plugin</artifactId>
-          <version>0.9</version>
-        </plugin>
       </plugins>
     </pluginManagement>
 
+    <plugins>
+
+      <!-- each sub-project copies site to stage location -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>stage</id>
+            <goals>
+              <goal>stage</goal>
+            </goals>
+            <phase>site</phase>
+            <configuration>
+              <stagingDirectory>${stage}</stagingDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- set staging location -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>set-stage</id>
+            <goals>
+              <goal>bsh-property</goal>
+            </goals>
+            <phase>pre-site</phase>
+            <configuration>
+              <source>stage = session.getTopLevelProject().getBuild().getDirectory() + "/stage"</source>
+              <properties>
+                <property>stage</property>
+              </properties>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
   </build>
 
   <reporting>
     <plugins>
-      <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <configuration></configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-pmd-plugin</artifactId>
-      </plugin>
       <plugin>
         <artifactId>maven-project-info-reports-plugin</artifactId>
         <reportSets>
@@ -506,25 +553,47 @@
           </reportSet>
         </reportSets>
       </plugin>
-      <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId><reportSets>
-        <reportSet>
-          <reports>
-            <report>report</report>
-          </reports>
-        </reportSet>
-      </reportSets>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-report-plugin</artifactId>
-      </plugin>
     </plugins>
   </reporting>
 
   <profiles>
-    <!-- release to github -->
+    <!-- publish site to github,
+    1. mvn [clean install] site
+    2. mvn -P gh-pages pre-site -->
+    <profile>
+      <id>gh-pages</id>
+      <build>
+        <plugins>
+          <!-- push stage to github gh-pages -->
+          <plugin>
+            <groupId>com.github.github</groupId>
+            <artifactId>site-maven-plugin</artifactId>
+            <inherited>false</inherited>
+            <configuration>
+              <message>Site documentation</message>
+              <path>${project.version}</path>
+              <merge>false</merge>
+              <server>github</server>
+              <repositoryName>apm-client</repositoryName>
+              <repositoryOwner>chonton</repositoryOwner>
+              <outputDirectory>${stage}</outputDirectory>
+            </configuration>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>site</goal>
+                </goals>
+                <phase>pre-site</phase>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!-- release to github
+    mvn clean deploy -P release
+    -->
     <profile>
       <id>release</id>
       <build>
@@ -573,7 +642,14 @@
           <plugin>
             <groupId>org.sonatype.plugins</groupId>
             <artifactId>nexus-staging-maven-plugin</artifactId>
-            <extensions>true</extensions>
+            <executions>
+              <execution>
+                <id>default-deploy</id>
+                <goals>
+                  <goal>deploy</goal>
+                </goals>
+              </execution>
+            </executions>
             <configuration>
               <serverId>ossrh</serverId>
               <nexusUrl>https://oss.sonatype.org/</nexusUrl>
@@ -583,32 +659,6 @@
 
         </plugins>
 
-      </build>
-    </profile>
-
-    <profile>
-      <id>release-site</id>
-      <build>
-        <plugins>
-          <plugin>
-            <!-- Deploy the web site -->
-            <groupId>com.github.github</groupId>
-            <artifactId>site-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>site</goal>
-                </goals>
-                <phase>site</phase>
-                <configuration>
-                  <message>Site documentation</message>
-                  <path>${project.version}</path>
-                  <merge>true</merge>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
       </build>
     </profile>
   </profiles>

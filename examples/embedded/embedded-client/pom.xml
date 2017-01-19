@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>embedded-client</artifactId>
-  <name>${artifactId}</name>
+  <name>${project.artifactId}</name>
   <description>Client for Example</description>
 
   <dependencies>

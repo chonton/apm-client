@@ -10,7 +10,7 @@
   </parent>
 
   <artifactId>embedded-server</artifactId>
-  <name>${artifactId}</name>
+  <name>${project.artifactId}</name>
   <description>Embedded Jetty Example Server</description>
 
   <dependencies>
