@@ -8,7 +8,14 @@ import java.util.concurrent.Callable;
  */
 public interface Tracer {
 
+  /**
+   * The name of the header containing the span identifier.
+   */
   String SPAN_ID = "x-ddtrace-parent_span_id";
+
+  /**
+   * The name of the header containing the trace identifier.
+   */
   String TRACE_ID = "x-ddtrace-parent_trace_id";
 
   /**

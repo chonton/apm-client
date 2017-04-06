@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.honton.chas.datadog.apm</groupId>
     <artifactId>parent</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
@@ -156,6 +156,23 @@
         </executions>
       </plugin>
 
+      <!-- delombok source code for javadoc generation -->
+      <plugin>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>delombok</goal>
+            </goals>
+            <configuration>
+              <addOutputDirectory>false</addOutputDirectory>
+              <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
       <!-- assert code coverage -->
       <plugin>
         <groupId>org.jacoco</groupId>
@@ -213,6 +230,7 @@
 
   <reporting>
     <plugins>
+
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
         <reportSets>
@@ -222,7 +240,11 @@
             </reports>
           </reportSet>
         </reportSets>
+        <configuration>
+          <sourcepath>${project.build.directory}/generated-sources/delombok</sourcepath>
+        </configuration>
       </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
@@ -234,6 +256,7 @@
           </reportSet>
         </reportSets>
       </plugin>
+
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
@@ -245,6 +268,7 @@
           </reportSet>
         </reportSets>
       </plugin>
+
     </plugins>
   </reporting>
 

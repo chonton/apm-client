@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.honton.chas.datadog.apm.examples</groupId>
     <artifactId>embedded</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
@@ -84,7 +84,7 @@
 
       <!-- for integration testing start and stop mock server and executable jar -->
       <plugin>
-        <groupId>com.bazaarvoice.maven.plugins</groupId>
+        <groupId>org.honton.chas</groupId>
         <artifactId>process-exec-maven-plugin</artifactId>
         <executions>
           <!-- start the mock apm server -->
