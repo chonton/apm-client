@@ -1,14 +1,13 @@
 package org.honton.chas.datadog.apm.sender;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import lombok.SneakyThrows;
 import org.honton.chas.datadog.apm.SpanBuilderTest;
 import org.honton.chas.datadog.apm.api.Trace;
 import org.junit.Assert;
 import org.junit.Test;
 
-import lombok.SneakyThrows;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TraceQueueTest {
 

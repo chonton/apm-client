@@ -26,6 +26,17 @@ import lombok.experimental.Accessors;
 @RequiredArgsConstructor
 public class SpanBuilder {
 
+  /**
+   * A callback used to augment newly constructed Spans
+   */
+  public interface Augmenter {
+    /**
+     * Add information to the span before submitting to APM
+     * @param spanBuilder The span builder to augment
+     */
+    void augment(SpanBuilder spanBuilder);
+  }
+
   private static final Random ID_GENERATOR = new Random();
 
   private final SpanBuilder parent;
@@ -120,7 +131,7 @@ public class SpanBuilder {
    * @param e The exception to add
    * @return The builder, for fluent style programming
    */
-  public SpanBuilder exception(Exception e) {
+  public SpanBuilder exception(Throwable e) {
     meta("error.msg", e.getMessage());
     String exception = e.getClass().getCanonicalName();
     error = exception.hashCode();
@@ -189,7 +200,7 @@ public class SpanBuilder {
    * @param ex The exceptions
    * @return The stack trace
    */
-  private static String exceptionToString(Exception ex) {
+  private static String exceptionToString(Throwable ex) {
     StringWriter errors = new StringWriter();
     ex.printStackTrace(new PrintWriter(errors));
     return errors.toString();

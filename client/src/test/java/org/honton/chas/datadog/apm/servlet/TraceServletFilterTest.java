@@ -1,12 +1,5 @@
 package org.honton.chas.datadog.apm.servlet;
 
-import java.io.IOException;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.honton.chas.datadog.apm.SpanBuilder;
 import org.honton.chas.datadog.apm.api.Span;
 import org.honton.chas.datadog.apm.cdi.TracerImpl;
@@ -14,6 +7,14 @@ import org.honton.chas.datadog.apm.cdi.TracerTestImpl;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 public class TraceServletFilterTest {
 
@@ -54,7 +55,7 @@ public class TraceServletFilterTest {
 
     Span span = tracer.getCapturedSpan();
     Assert.assertEquals("service", span.getService());
-    Assert.assertEquals("example.com:7110", span.getResource());
+    Assert.assertEquals("SR:example.com:7110", span.getResource());
     Assert.assertEquals("GET:/some/path", span.getOperation());
     return span;
   }

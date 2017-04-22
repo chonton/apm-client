@@ -25,7 +25,7 @@ public class TraceClientFilter
   @Override
   public void filter(final ClientRequestContext requestContext) throws IOException {
     URI uri = requestContext.getUri();
-    tracer.exportSpan(uri.getHost() + ':' + uri.getPort(),
+    tracer.exportSpan("CS:" + uri.getHost() + ':' + uri.getPort(),
     requestContext.getMethod() + ':' + uri.getPath().toLowerCase(),
       new Tracer.HeaderMutator() {
         @Override

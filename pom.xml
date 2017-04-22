@@ -376,11 +376,6 @@
     <pluginManagement>
       <plugins>
         <plugin>
-          <groupId>org.honton.chas</groupId>
-          <artifactId>process-exec-maven-plugin</artifactId>
-          <version>0.9</version>
-        </plugin>
-        <plugin>
           <groupId>com.github.github</groupId>
           <artifactId>site-maven-plugin</artifactId>
           <version>0.11</version>
@@ -467,6 +462,11 @@
         </plugin>
         <plugin>
           <groupId>org.honton.chas</groupId>
+          <artifactId>process-exec-maven-plugin</artifactId>
+          <version>0.9</version>
+        </plugin>
+        <plugin>
+          <groupId>org.honton.chas</groupId>
           <artifactId>testpojo-maven-plugin</artifactId>
           <version>0.0.5</version>
         </plugin>
@@ -476,14 +476,14 @@
           <version>0.7.7.201606060606</version>
         </plugin>
         <plugin>
-          <groupId>org.sonatype.plugins</groupId>
-          <artifactId>nexus-staging-maven-plugin</artifactId>
-          <version>1.6.3</version>
-        </plugin>
-        <plugin>
           <groupId>org.projectlombok</groupId>
           <artifactId>lombok-maven-plugin</artifactId>
           <version>1.16.12.0</version>
+        </plugin>
+        <plugin>
+          <groupId>org.sonatype.plugins</groupId>
+          <artifactId>nexus-staging-maven-plugin</artifactId>
+          <version>1.6.3</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -642,6 +642,11 @@
           <plugin>
             <groupId>org.sonatype.plugins</groupId>
             <artifactId>nexus-staging-maven-plugin</artifactId>
+            <configuration>
+              <serverId>ossrh</serverId>
+              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+              <autoReleaseAfterClose>true</autoReleaseAfterClose>
+            </configuration>
             <executions>
               <execution>
                 <id>default-deploy</id>
@@ -650,11 +655,6 @@
                 </goals>
               </execution>
             </executions>
-            <configuration>
-              <serverId>ossrh</serverId>
-              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-              <autoReleaseAfterClose>true</autoReleaseAfterClose>
-            </configuration>
           </plugin>
 
         </plugins>

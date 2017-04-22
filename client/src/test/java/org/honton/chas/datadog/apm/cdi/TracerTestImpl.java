@@ -1,11 +1,12 @@
 package org.honton.chas.datadog.apm.cdi;
 
-import javax.annotation.Priority;
-import javax.enterprise.inject.Alternative;
-import javax.interceptor.Interceptor;
 import lombok.Getter;
 import org.honton.chas.datadog.apm.TraceConfigurationFactory;
 import org.honton.chas.datadog.apm.api.Span;
+
+import javax.annotation.Priority;
+import javax.enterprise.inject.Alternative;
+import javax.interceptor.Interceptor;
 
 /**
  * An implementation that captures the queued span and allows access to it.

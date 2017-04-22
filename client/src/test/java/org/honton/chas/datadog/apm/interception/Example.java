@@ -1,8 +1,9 @@
 package org.honton.chas.datadog.apm.interception;
 
-import javax.inject.Inject;
 import org.honton.chas.datadog.apm.TraceOperation;
 import org.honton.chas.datadog.apm.Tracer;
+
+import javax.inject.Inject;
 
 /**
  * A class to test interception

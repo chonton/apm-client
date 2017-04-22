@@ -1,9 +1,5 @@
 package org.honton.chas.datadog.apm.api;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import javax.ws.rs.client.WebTarget;
 import org.honton.chas.datadog.apm.SpanBuilderTest;
 import org.honton.chas.datadog.apm.jackson.MsgPackProvider;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
@@ -21,6 +17,11 @@ import org.mockserver.model.Delay;
 import org.mockserver.model.Header;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
+
+import javax.ws.rs.client.WebTarget;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class ApmApiTest {
 

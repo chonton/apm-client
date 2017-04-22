@@ -156,23 +156,6 @@
         </executions>
       </plugin>
 
-      <!-- delombok source code for javadoc generation -->
-      <plugin>
-        <groupId>org.projectlombok</groupId>
-        <artifactId>lombok-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>delombok</goal>
-            </goals>
-            <configuration>
-              <addOutputDirectory>false</addOutputDirectory>
-              <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
       <!-- assert code coverage -->
       <plugin>
         <groupId>org.jacoco</groupId>
@@ -224,6 +207,23 @@
         </executions>
       </plugin>
 
+      <!-- delombok source code for javadoc generation -->
+      <plugin>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>delombok</goal>
+            </goals>
+            <configuration>
+              <addOutputDirectory>false</addOutputDirectory>
+              <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
 
   </build>
@@ -233,6 +233,9 @@
 
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <sourcepath>${project.build.directory}/generated-sources/delombok</sourcepath>
+        </configuration>
         <reportSets>
           <reportSet>
             <reports>
@@ -240,9 +243,6 @@
             </reports>
           </reportSet>
         </reportSets>
-        <configuration>
-          <sourcepath>${project.build.directory}/generated-sources/delombok</sourcepath>
-        </configuration>
       </plugin>
 
       <plugin>

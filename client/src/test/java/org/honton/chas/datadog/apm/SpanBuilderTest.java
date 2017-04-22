@@ -1,14 +1,14 @@
 package org.honton.chas.datadog.apm;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import java.util.Map;
 import org.honton.chas.datadog.apm.api.Span;
 import org.honton.chas.datadog.apm.api.Trace;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public class SpanBuilderTest {
 

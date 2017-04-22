@@ -1,29 +1,21 @@
 package org.honton.chas.datadog.apm.cdi;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-
-import org.honton.chas.datadog.apm.TraceConfigurationFactory;
-import org.honton.chas.datadog.apm.api.Span;
-import org.honton.chas.datadog.apm.cdi.TracerImpl;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 public class BrokenQueueTracerTest {
 
   private static final String RE_MESSAGE = "Expected exception to show up as ERROR in log";
-  private TracerImpl tracer;
+
+  private TracerTestImpl tracer;
 
   @Before
   public void setupTracer() {
-    tracer = new TracerImpl() {
-      @Override
-      void queueSpan(Span qs) {
-        throw new RuntimeException(RE_MESSAGE);
-      }
-    };
-    tracer.setTraceConfiguration(TraceConfigurationFactory.DEFAULTS);
+    tracer = new TracerTestImpl();
   }
 
   private void testRunnable(final boolean throwException) throws URISyntaxException, IOException {

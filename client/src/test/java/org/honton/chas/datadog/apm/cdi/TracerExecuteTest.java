@@ -1,38 +1,32 @@
 package org.honton.chas.datadog.apm.cdi;
 
-import static org.junit.Assert.fail;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.concurrent.Callable;
-import org.honton.chas.datadog.apm.TraceConfigurationFactory;
 import org.honton.chas.datadog.apm.api.Span;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.concurrent.Callable;
+
+import static org.junit.Assert.fail;
+
 public class TracerExecuteTest {
 
-  private Span span;
-  private TracerImpl tracer;
+  private TracerTestImpl tracer;
   private boolean wasRun;
 
   @Before
   public void setupTracer() {
-    tracer = new TracerImpl() {
-      @Override
-      void queueSpan(Span qs) {
-        span = qs;
-      }
-    };
-    tracer.setTraceConfiguration(TraceConfigurationFactory.DEFAULTS);
+    tracer = new TracerTestImpl();
   }
 
   @After
   public void validate() {
     Assert.assertTrue(wasRun);
 
+    Span span = tracer.getCapturedSpan();
     Assert.assertEquals("service", span.getService());
     Assert.assertEquals("resource", span.getResource());
     Assert.assertEquals("operation", span.getOperation());
@@ -57,7 +51,7 @@ public class TracerExecuteTest {
   @Test
   public void testCallableWithReturn() throws Exception {
     testCallable(false);
-    Assert.assertEquals(0, span.getError());
+    Assert.assertEquals(0, tracer.getCapturedSpan().getError());
   }
 
   @Test
@@ -66,7 +60,7 @@ public class TracerExecuteTest {
       testCallable(true);
       fail("Expected exception did not get thrown");
     } catch (RuntimeException expected) {
-      Assert.assertNotEquals(0, span.getError());
+      Assert.assertNotEquals(0, tracer.getCapturedSpan().getError());
     }
   }
 
@@ -87,7 +81,7 @@ public class TracerExecuteTest {
   @Test
   public void testRunnableWithReturn() throws Exception {
     testRunnable(false);
-    Assert.assertEquals(0, span.getError());
+    Assert.assertEquals(0, tracer.getCapturedSpan().getError());
   }
 
   @Test
@@ -96,7 +90,7 @@ public class TracerExecuteTest {
       testRunnable(true);
       fail("Expected exception did not get thrown");
     } catch (RuntimeException expected) {
-      Assert.assertNotEquals(0, span.getError());
+      Assert.assertNotEquals(0, tracer.getCapturedSpan().getError());
     }
   }
 }

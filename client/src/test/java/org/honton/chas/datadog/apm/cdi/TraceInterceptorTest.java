@@ -1,33 +1,27 @@
 package org.honton.chas.datadog.apm.cdi;
 
-import java.lang.reflect.Method;
-
-import javax.interceptor.InvocationContext;
-
-import org.honton.chas.datadog.apm.TraceConfigurationFactory;
 import org.honton.chas.datadog.apm.api.Span;
-import org.honton.chas.datadog.apm.cdi.TraceInterceptor;
-import org.honton.chas.datadog.apm.cdi.TracerImpl;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import javax.interceptor.InvocationContext;
+import java.lang.reflect.Method;
+
 public class TraceInterceptorTest {
 
-  private Span span;
+  TracerTestImpl tracer;
+  TraceInterceptor traceInterceptor;
+
+  @Before
+  public void setupTracer() {
+    tracer = new TracerTestImpl();
+    traceInterceptor = new TraceInterceptor();
+    traceInterceptor.tracer = tracer;
+  }
 
   private void test(Object response) throws Exception {
-
-    TracerImpl tracer = new TracerImpl() {
-      @Override
-      void queueSpan(Span qs) {
-        span = qs;
-      }
-    };
-    tracer.setTraceConfiguration(TraceConfigurationFactory.DEFAULTS);
-
-    TraceInterceptor ti = new TraceInterceptor();
-    ti.tracer = tracer;
 
     InvocationContext ctx = Mockito.mock(InvocationContext.class);
     if(response instanceof Exception) {
@@ -42,7 +36,7 @@ public class TraceInterceptorTest {
 
     if(response instanceof Exception) {
       try {
-        ti.invokeWithReporting(ctx);
+        traceInterceptor.invokeWithReporting(ctx);
         Assert.fail("expecting exception");
       }
       catch(Exception e) {
@@ -50,9 +44,10 @@ public class TraceInterceptorTest {
       }
     }
     else {
-      Assert.assertSame(response, ti.invokeWithReporting(ctx));
+      Assert.assertSame(response, traceInterceptor.invokeWithReporting(ctx));
     }
 
+    Span span = tracer.getCapturedSpan();
     Assert.assertEquals("service", span.getService());
     Assert.assertEquals(getClass().getCanonicalName(), span.getResource());
     Assert.assertEquals(method.getName(), span.getOperation());
@@ -66,6 +61,7 @@ public class TraceInterceptorTest {
   @Test
   public void testWithException() throws Exception {
     test(new RuntimeException("what a mess"));
+    Span span = tracer.getCapturedSpan();
     Assert.assertEquals("what a mess", span.getMeta().get("error.msg"));
     Assert.assertNotEquals(0, span.getError());
   }

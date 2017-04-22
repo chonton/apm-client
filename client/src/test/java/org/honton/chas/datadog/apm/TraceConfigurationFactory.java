@@ -1,7 +1,7 @@
 package org.honton.chas.datadog.apm;
 
-import java.util.concurrent.TimeUnit;
 import javax.enterprise.inject.Produces;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Trace server configuration values for testing
@@ -9,8 +9,8 @@ import javax.enterprise.inject.Produces;
 public class TraceConfigurationFactory {
 
   public static final TraceConfiguration DEFAULTS = new TraceConfiguration(
-        "service",
-          "http://localhost:1", // no-one should be listening to this port
+    "service",
+    "http://localhost:1", // no-one should be listening to this port
     TimeUnit.MINUTES.toMillis(15));
 
   /**

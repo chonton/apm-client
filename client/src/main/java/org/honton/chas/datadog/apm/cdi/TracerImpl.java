@@ -1,18 +1,16 @@
 package org.honton.chas.datadog.apm.cdi;
 
-import java.util.concurrent.Callable;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.honton.chas.datadog.apm.SpanBuilder;
 import org.honton.chas.datadog.apm.TraceConfiguration;
 import org.honton.chas.datadog.apm.Tracer;
 import org.honton.chas.datadog.apm.api.Span;
 import org.honton.chas.datadog.apm.sender.Writer;
 
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import java.util.concurrent.Callable;
 
 /**
  * TracerImpl which acts as span factory.
@@ -21,16 +19,30 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TracerImpl implements Tracer {
 
-  private final ThreadLocal<SpanBuilder> currentSpan = new ThreadLocal<>();
+  private final SpanBuilder.Augmenter DO_NOTHING = new SpanBuilder.Augmenter() {
+    @Override
+    public void augment(SpanBuilder spanBuilder) {
+    }
+  };
+
+  private final ThreadLocal<SpanBuilder> CURRENT_SPAN = new ThreadLocal<>();
 
   @Inject
   private Writer writer;
 
   private String service;
+  private SpanBuilder.Augmenter rootAugmenter;
+
+  public TracerImpl() {
+  }
 
   @Inject
   void setTraceConfiguration(TraceConfiguration configuration) {
     service = configuration.getService();
+    rootAugmenter = configuration.getRootAugmenter();
+    if(rootAugmenter == null) {
+      rootAugmenter = DO_NOTHING;
+    }
   }
 
   /**
@@ -83,11 +95,12 @@ public class TracerImpl implements Tracer {
    */
   @Override
   public SpanBuilder getCurrentSpan() {
-    return currentSpan.get();
+    return CURRENT_SPAN.get();
   }
 
   /**
    * Import a span across process boundaries using a set of headers.
+   * If trace headers are not provided, creates a new root span.
    * 
    * @param headerAccessor The function access to headers. Function supplied with header name and
    *        should return the header value.
@@ -98,13 +111,13 @@ public class TracerImpl implements Tracer {
 
     String traceIdHeader = headerAccessor.getValue(TRACE_ID);
     if (traceIdHeader == null) {
-      current = SpanBuilder.createRoot();
+      current = createRoot();
     } else {
       long traceId = Long.parseLong(traceIdHeader, 16);
       long spanId = Long.parseLong(headerAccessor.getValue(SPAN_ID), 16);
       current = SpanBuilder.createChild(traceId, spanId);
     }
-    currentSpan.set(current);
+    CURRENT_SPAN.set(current);
     return current;
   }
 
@@ -131,10 +144,16 @@ public class TracerImpl implements Tracer {
    */
   @Override
   public SpanBuilder createSpan() {
-    SpanBuilder parent = currentSpan.get();
-    SpanBuilder span = parent == null ? SpanBuilder.createRoot() : parent.createChild();
-    currentSpan.set(span);
+    SpanBuilder parent = CURRENT_SPAN.get();
+    SpanBuilder span = parent == null ? createRoot() : parent.createChild();
+    CURRENT_SPAN.set(span);
     return span;
+  }
+
+  private SpanBuilder createRoot() {
+    SpanBuilder root = SpanBuilder.createRoot();
+    rootAugmenter.augment(root);
+    return root;
   }
 
   /**
@@ -142,7 +161,7 @@ public class TracerImpl implements Tracer {
    */
   @Override
   public void closeCurrentSpan() {
-    closeSpan(currentSpan.get());
+    closeSpan(CURRENT_SPAN.get());
   }
 
   /**
@@ -154,7 +173,7 @@ public class TracerImpl implements Tracer {
   @Override
   public void closeSpan(SpanBuilder current) {
     try {
-      currentSpan.set(current.parent());
+      CURRENT_SPAN.set(current.parent());
       Span span = current.finishSpan(service);
       queueSpan(span);
     } catch (RuntimeException re) {

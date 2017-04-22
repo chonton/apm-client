@@ -1,7 +1,5 @@
 package org.honton.chas.datadog.apm.sender;
 
-import java.util.concurrent.TimeUnit;
-
 import org.honton.chas.datadog.apm.SpanBuilderTest;
 import org.honton.chas.datadog.apm.TraceConfiguration;
 import org.junit.AfterClass;
@@ -16,6 +14,8 @@ import org.mockserver.model.Header;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
 import org.mockserver.verify.VerificationTimes;
+
+import java.util.concurrent.TimeUnit;
 
 public class WriterTest {
 
