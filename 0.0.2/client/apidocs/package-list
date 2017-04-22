@@ -1,0 +1,8 @@
+org.honton.chas.datadog.apm
+org.honton.chas.datadog.apm.api
+org.honton.chas.datadog.apm.cdi
+org.honton.chas.datadog.apm.jackson
+org.honton.chas.datadog.apm.jaxrs
+org.honton.chas.datadog.apm.proxy
+org.honton.chas.datadog.apm.sender
+org.honton.chas.datadog.apm.servlet
