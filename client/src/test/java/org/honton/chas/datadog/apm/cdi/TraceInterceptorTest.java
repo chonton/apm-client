@@ -11,8 +11,8 @@ import java.lang.reflect.Method;
 
 public class TraceInterceptorTest {
 
-  TracerTestImpl tracer;
-  TraceInterceptor traceInterceptor;
+  private TracerTestImpl tracer;
+  private TraceInterceptor traceInterceptor;
 
   @Before
   public void setupTracer() {

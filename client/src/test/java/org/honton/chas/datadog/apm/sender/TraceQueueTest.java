@@ -11,8 +11,8 @@ import java.util.List;
 
 public class TraceQueueTest {
 
-  TraceQueue queue = new TraceQueue();
-  List<Trace> expected;
+  private TraceQueue queue = new TraceQueue();
+  private List<Trace> expected;
 
   private void addTraces(int n) {
     expected = new ArrayList<>(n);

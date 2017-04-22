@@ -31,7 +31,7 @@ public class TracerImpl implements Tracer {
   private Writer writer;
 
   private String service;
-  private SpanBuilder.Augmenter rootAugmenter;
+  private SpanBuilder.Augmenter augmenter;
 
   public TracerImpl() {
   }
@@ -39,9 +39,9 @@ public class TracerImpl implements Tracer {
   @Inject
   void setTraceConfiguration(TraceConfiguration configuration) {
     service = configuration.getService();
-    rootAugmenter = configuration.getRootAugmenter();
-    if(rootAugmenter == null) {
-      rootAugmenter = DO_NOTHING;
+    augmenter = configuration.getAugmenter();
+    if(augmenter == null) {
+      augmenter = DO_NOTHING;
     }
   }
 
@@ -111,12 +111,13 @@ public class TracerImpl implements Tracer {
 
     String traceIdHeader = headerAccessor.getValue(TRACE_ID);
     if (traceIdHeader == null) {
-      current = createRoot();
+      current = SpanBuilder.createRoot();
     } else {
       long traceId = Long.parseLong(traceIdHeader, 16);
       long spanId = Long.parseLong(headerAccessor.getValue(SPAN_ID), 16);
       current = SpanBuilder.createChild(traceId, spanId);
     }
+    augmenter.augment(current);
     CURRENT_SPAN.set(current);
     return current;
   }
@@ -145,15 +146,10 @@ public class TracerImpl implements Tracer {
   @Override
   public SpanBuilder createSpan() {
     SpanBuilder parent = CURRENT_SPAN.get();
-    SpanBuilder span = parent == null ? createRoot() : parent.createChild();
+    SpanBuilder span = parent == null ? SpanBuilder.createRoot() : parent.createChild();
+    augmenter.augment(span);
     CURRENT_SPAN.set(span);
     return span;
-  }
-
-  private SpanBuilder createRoot() {
-    SpanBuilder root = SpanBuilder.createRoot();
-    rootAugmenter.augment(root);
-    return root;
   }
 
   /**

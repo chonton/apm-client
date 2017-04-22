@@ -1,6 +1,8 @@
 package org.honton.chas.datadog.apm.cdi;
 
 import lombok.Getter;
+import org.honton.chas.datadog.apm.SpanBuilder;
+import org.honton.chas.datadog.apm.TraceConfiguration;
 import org.honton.chas.datadog.apm.TraceConfigurationFactory;
 import org.honton.chas.datadog.apm.api.Span;
 
@@ -20,6 +22,15 @@ public class TracerTestImpl extends TracerImpl {
 
   public TracerTestImpl() {
     setTraceConfiguration(TraceConfigurationFactory.DEFAULTS);
+  }
+
+  public TracerTestImpl(SpanBuilder.Augmenter augmenter) {
+    setTraceConfiguration(new TraceConfiguration(
+    TraceConfigurationFactory.DEFAULTS.getService(),
+      TraceConfigurationFactory.DEFAULTS.getCollectorUrl(),
+      TraceConfigurationFactory.DEFAULTS.getBackoffDuration(),
+      augmenter
+    ));
   }
 
   @Override

@@ -24,7 +24,7 @@ import org.mockserver.model.HttpResponse;
 @RunWith(CdiRunner.class)
 public class HelloIT {
 
-  private static final int APM_PORT = 7777;
+  private static final int APM_PORT = 8126;
 
   @Inject
   private ProxyFactory proxyFactory;

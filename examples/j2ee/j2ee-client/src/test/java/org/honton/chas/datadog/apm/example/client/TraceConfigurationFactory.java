@@ -14,7 +14,7 @@ public class TraceConfigurationFactory {
   static TraceConfiguration getDefault() {
     return new TraceConfiguration(
       "greetings-client",
-      "http://localhost:7777",
+      "http://localhost:8126",
       TimeUnit.MINUTES.toMillis(1));
   }
 }

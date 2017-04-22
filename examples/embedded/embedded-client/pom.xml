@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.honton.chas.datadog.apm.examples</groupId>
     <artifactId>embedded</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.2</version>
     <relativePath>..</relativePath>
   </parent>
 
@@ -141,7 +141,7 @@
                 <argument>-jar</argument>
                 <argument>dependency/mockserver-netty-${mockserver.version}-jar-with-dependencies.jar</argument>
                 <argument>-serverPort</argument>
-                <argument>7777</argument>
+                <argument>8126</argument>
               </arguments>
             </configuration>
           </execution>
@@ -155,7 +155,7 @@
             <phase>pre-integration-test</phase>
             <configuration>
               <name>example-server</name>
-              <healthcheckUrl>http://127.0.0.1:5555/health</healthcheckUrl>
+              <healthCheckUrl>http://127.0.0.1:5555/health</healthCheckUrl>
               <waitAfterLaunch>5</waitAfterLaunch>
               <workingDir>../../embedded-server/target/</workingDir>
               <arguments>

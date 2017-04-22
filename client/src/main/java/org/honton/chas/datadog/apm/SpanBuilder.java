@@ -17,7 +17,7 @@ import lombok.experimental.Accessors;
 
 /**
  * An active Span builder.  Provides methods to get and set the Span attributes.
- * Some attributes, such as the start time, traceId, parentId, and traceId
+ * Some attributes, such as the start time, traceId, and parentId
  * are final and cannot be modified.
  */
 @Accessors(fluent = true)

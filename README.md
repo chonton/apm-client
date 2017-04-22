@@ -3,7 +3,7 @@ This java client intercepts servlet requests, jax-rs client requests, and bean m
 and method names as well as the wall time and duration of the request are recorded in spans.  These
 spans are queued and sent as REST messages to a [Datadog APM collector](https://www.datadoghq.com/apm/).
 
-[Javadoc](https://chonton.github.io/apm-client/0.0.1/client/apidocs/index.html) and [build reports](https://chonton.github.io/apm-client/0.0.1/client/project-reports.html) are available.
+[Javadoc](https://chonton.github.io/apm-client/0.0.2/client/apidocs/index.html) and [build reports](https://chonton.github.io/apm-client/0.0.2/client/project-reports.html) are available.
 
 ### Requirements
 * Minimal latency in the mainline processing
@@ -26,7 +26,7 @@ To include apm-client in your maven build, use the following fragment in your po
       <plugin>
         <groupId>org.honton.chas.datadog</groupId>
         <artifactId>apm-client</artifactId>
-        <version>0.0.1</version>
+        <version>0.0.2</version>
       </plugin>
     </plugins>
   </build>
@@ -34,10 +34,12 @@ To include apm-client in your maven build, use the following fragment in your po
 
 ## Configuration
 To configure apm-client, you must supply a CDI factory method which produces a TraceConfiguration
-instance.  Three attributes are configured:
+instance.  Three or four attributes are configured:
 * The service name reported with each span sent to Datadog APM collector.
 * The URL of the local Datadog APM collector.
 * The number of milliseconds to backoff.
+* An optional Span Augmenter that will be invoked whenever a span is created.  The Augmenter can add
+metadata and metrics to the span.
 
 After any communication failure, the apm-client logs the failure and will not further attempt to 
 send span information for the backoff period.  During this period all spans are dropped.
@@ -53,7 +55,7 @@ public class TraceConfigurationFactory {
   static TraceConfiguration getDefault() {
     return new TraceConfiguration(
       "service-name",       // service name
-      "http://localhost:7777",  // apm collector url
+      "http://localhost:8126",  // apm collector url
       TimeUnit.MINUTES.toMillis(1));  // backoff period
   }
 }
@@ -143,7 +145,7 @@ public class ProxyFactory {
 
 ## TraceInterceptor
 The TraceOperation annotation instructs TraceInterceptor to create a new span is before entering a
-CDI bean operation and close the span once the operation is complete.  Completed spans are sent to 
+CDI bean operation and close the span once the operation is complete.  Completed spans are sent to
 Datadog APM.  The TraceOperation annotation can be placed on the class or the method definition.
 Placing the annotation on a method will cause any invocation from outside the class to be traced. 
 Placing the annotation on a class will cause all methods in that class to be traced, unless the
@@ -165,6 +167,23 @@ public class ExampleBean {
   @TraceOperation(false)
   public void dontTrace() {
     // ...
+  }
+}
+```
+
+## ProxyFactory
+Occasionally, you will need to intercept operations on non-cdi instances.  In this case, you can 
+create a proxy which will create a new span before invoking any interface method and close the span
+once the invocation is complete.
+```java
+public class BeanFactory {
+  
+  @Inject
+  ProxyFactory proxyFactory;
+  
+  @Produces
+  public NonCdi factoryMethod() {
+    return proxyFactory.createProxy(new NonCdiImpl(), NonCdi.class);
   }
 }
 ```

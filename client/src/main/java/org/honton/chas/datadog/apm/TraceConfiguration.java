@@ -27,9 +27,9 @@ public class TraceConfiguration {
   private long backoffDuration;
 
   /**
-   * Invoked whenever a root span is created
+   * Invoked whenever a span is created
    */
-  private SpanBuilder.Augmenter rootAugmenter;
+  private SpanBuilder.Augmenter augmenter;
 
   public TraceConfiguration(String service, String collectorUrl, long backoffDuration) {
     this(service, collectorUrl, backoffDuration, null);
