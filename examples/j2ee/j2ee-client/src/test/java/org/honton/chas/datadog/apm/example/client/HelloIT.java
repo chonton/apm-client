@@ -3,6 +3,7 @@ package org.honton.chas.datadog.apm.example.client;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
@@ -25,6 +26,9 @@ import org.mockserver.model.HttpResponse;
 public class HelloIT {
 
   private static final int APM_PORT = 8126;
+  private static final ObjectMapper MAPPER = new ObjectMapper();
+  private static final TypeReference<List<List<Span>>> LIST_LIST_SPAN =
+    new TypeReference<List<List<Span>>>() {};
 
   @Inject
   private ProxyFactory proxyFactory;
@@ -53,33 +57,43 @@ public class HelloIT {
         .withDelay(new Delay(TimeUnit.MILLISECONDS, 20)));
   }
 
-  private HttpRequest[] getRequests() throws InterruptedException {
-    HttpRequest v2traces = HttpRequest.request().withMethod("PUT").withPath("/v0.2/traces");
-    HttpRequest[] requests;
-    // wait for server to deliver traces
-    for (long expire = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(10);
-        System.currentTimeMillis() < expire; Thread.sleep(200)) {
-      requests = new MockServerClient("localhost", APM_PORT).retrieveRecordedRequests(v2traces);
-      if (requests.length == 3) {
-        return requests;
+
+  private List<Span> requestsToSpans(HttpRequest[] requests) throws IOException {
+    List<Span> spans = new ArrayList<>();
+    for (HttpRequest request : requests) {
+      String body = request.getBodyAsString();
+      List<List<Span>> traces = MAPPER.readValue(body, LIST_LIST_SPAN);
+      for(List<Span> trace : traces) {
+        for(Span span : trace) {
+          spans.add(span);
+        }
       }
     }
-    throw new AssertionError("Did not get 3 request within 10 seconds");
+    return spans;
+  }
+
+  private List<Span> getSpans(int count) throws InterruptedException, IOException {
+    HttpRequest v2traces = HttpRequest.request().withMethod("PUT").withPath("/v0.2/traces");
+    // wait for server to deliver traces
+    for (long expire = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(10); System.currentTimeMillis() < expire; Thread.sleep(200)) {
+      HttpRequest[] requests = new MockServerClient("localhost", APM_PORT).retrieveRecordedRequests(v2traces);
+      List<Span> spans = requestsToSpans(requests);
+      if (spans.size() == count) {
+        return spans;
+      }
+    }
+    throw new AssertionError("Did not get " + count + " spans within 10 seconds");
   }
 
   @After
   public void verifyMockWasCalled() throws InterruptedException, IOException {
-    HttpRequest[] requests = getRequests();
+    List<Span> spans = getSpans(3);
 
     Span intercepted = null;
     Span client = null;
     Span server = null;
 
-    ObjectMapper mapper = new ObjectMapper();
-    for(HttpRequest request : requests) {
-      String body = request.getBodyAsString();
-      List<List<Span>> traces = mapper.readValue(body, new TypeReference<List<List<Span>>>() {});
-      Span span = traces.get(0).get(0);
+    for(Span span : spans) {
       if(span.getOperation().equals("kr")) {
         intercepted = span;
       }

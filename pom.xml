@@ -4,7 +4,7 @@
 
   <groupId>org.honton.chas.datadog.apm</groupId>
   <artifactId>parent</artifactId>
-  <version>0.0.2</version>
+  <version>0.0.3-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>${project.artifactId}</name>
@@ -325,7 +325,7 @@
       <dependency>
         <groupId>org.msgpack</groupId>
         <artifactId>jackson-dataformat-msgpack</artifactId>
-        <version>0.8.11</version>
+        <version>0.8.12</version>
       </dependency>
 
       <dependency>

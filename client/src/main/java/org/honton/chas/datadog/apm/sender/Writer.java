@@ -1,5 +1,6 @@
 package org.honton.chas.datadog.apm.sender;
 
+import java.util.Collections;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -51,7 +52,7 @@ public class Writer {
     // queue == null is signal that worker worker is no longer running
     TraceQueue q = queue;
     if (q != null) {
-      q.supply(new Trace(span));
+      q.supply(span);
     }
   }
 
@@ -74,7 +75,7 @@ public class Writer {
    *
    * @return false, if worker worker has been shutdown
    */
-  List<Trace> consumeAndSend() {
+  List<Span> consumeAndSend() {
     try {
       return queue.consume();
     } catch (InterruptedException ie) {
@@ -83,31 +84,34 @@ public class Writer {
     }
   }
 
-  private void trySend(List<Trace> list) {
+  private void trySend(List<Span> spans) {
     if (System.currentTimeMillis() > backoffExpiration) {
       try {
-        send(list);
+        send(spans);
       } catch (RuntimeException re) {
-        log.info("writer worker problem", re);
+        log.info("writer worker problem sending to " + apmUri, re);
         backoffExpiration = System.currentTimeMillis() + backoffDuration;
       }
     }
   }
 
-  private void send(List<Trace> traces) {
+  private void send(List<Span> spans) {
     try {
+      final List<Trace> traces = Collections.singletonList(new Trace(spans));
       apmApi.reportTraces(traces);
     } catch (NotFoundException | NotSupportedException cee) {
       // 404, 415
       if (apmApi instanceof ApmApi0_3) {
+        log.info("falling back to json");
         fallbackTo0_2();
-        send(traces);
+        send(spans);
       }
     }
   }
 
   private void fallbackTo0_2() {
     apmApi = getProxy(ApmApi0_2.class);
+    backoffExpiration = 0;
   }
 
   private void initializeWith0_3() {
@@ -123,12 +127,12 @@ public class Writer {
       @Override
       public void run() {
         for(;;) {
-          List<Trace> traces = consumeAndSend();
-          if(traces == null) {
+          List<Span> spans = consumeAndSend();
+          if(spans == null) {
             log.error("writer worker shutdown");
             break;
           }
-          trySend(traces);
+          trySend(spans);
         }
       }
     };

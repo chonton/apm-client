@@ -29,10 +29,6 @@ public class SpanBuilderTest {
     return SpanBuilder.createRoot().finishSpan("service");
   }
 
-  public static Trace getTestTrace() {
-    return new Trace(getTestSpan());
-  }
-
   @Test
   public void testRootChildRelations() {
     SpanBuilder rootBuilder = SpanBuilder.createRoot();

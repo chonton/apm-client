@@ -2,6 +2,7 @@ package org.honton.chas.datadog.apm.sender;
 
 import lombok.SneakyThrows;
 import org.honton.chas.datadog.apm.SpanBuilderTest;
+import org.honton.chas.datadog.apm.api.Span;
 import org.honton.chas.datadog.apm.api.Trace;
 import org.junit.Assert;
 import org.junit.Test;
@@ -12,12 +13,12 @@ import java.util.List;
 public class TraceQueueTest {
 
   private TraceQueue queue = new TraceQueue();
-  private List<Trace> expected;
+  private List<Span> expected;
 
   private void addTraces(int n) {
     expected = new ArrayList<>(n);
     for(int i=0; i< n; ++i) {
-      Trace single = SpanBuilderTest.getTestTrace();
+      Span single = SpanBuilderTest.getTestSpan();
       queue.supply(single);
       expected.add(single);
     }

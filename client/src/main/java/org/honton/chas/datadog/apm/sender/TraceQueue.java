@@ -3,6 +3,7 @@ package org.honton.chas.datadog.apm.sender;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.honton.chas.datadog.apm.api.Span;
 import org.honton.chas.datadog.apm.api.Trace;
 
 /**
@@ -10,21 +11,21 @@ import org.honton.chas.datadog.apm.api.Trace;
  */
 public class TraceQueue {
 
-  private List<Trace> traces;
+  private List<Span> spans;
 
   /**
    * Supply a span. Should cause minimal wait.
    *
-   * @param trace The trace to supply
+   * @param span The trace to supply
    */
-  public void supply(Trace trace) {
+  public void supply(Span span) {
     synchronized (this) {
-      if (traces == null) {
+      if (spans == null) {
         // there were no traces, notify consumer there are now traces
         notify();
-        traces = new ArrayList<>();
+        spans = new ArrayList<>();
       }
-      traces.add(trace);
+      spans.add(span);
     }
   }
 
@@ -34,15 +35,15 @@ public class TraceQueue {
    * @return All available traces
    * @throws InterruptedException
    */
-  public List<Trace> consume() throws InterruptedException {
-    List<Trace> rc;
+  public List<Span> consume() throws InterruptedException {
+    List<Span> rc;
     synchronized (this) {
       // wait for an available span
-      while (traces == null) {
+      while (spans == null) {
         wait();
       }
-      rc = traces;
-      traces = null;
+      rc = spans;
+      spans = null;
     }
     return rc;
   }
