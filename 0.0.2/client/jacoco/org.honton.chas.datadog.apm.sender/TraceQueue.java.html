@@ -3,30 +3,31 @@
 import java.util.ArrayList;
 import java.util.List;
 
+import org.honton.chas.datadog.apm.api.Span;
 import org.honton.chas.datadog.apm.api.Trace;
 
 /**
  * A queue for multiple suppliers and a single consumer.
  */
-<span class="fc" id="L11">public class TraceQueue {</span>
+<span class="fc" id="L12">public class TraceQueue {</span>
 
-  private List&lt;Trace&gt; traces;
+  private List&lt;Span&gt; spans;
 
   /**
    * Supply a span. Should cause minimal wait.
    *
-   * @param trace The trace to supply
+   * @param span The trace to supply
    */
-  public void supply(Trace trace) {
-<span class="fc" id="L21">    synchronized (this) {</span>
-<span class="fc bfc" id="L22" title="All 2 branches covered.">      if (traces == null) {</span>
+  public void supply(Span span) {
+<span class="fc" id="L22">    synchronized (this) {</span>
+<span class="fc bfc" id="L23" title="All 2 branches covered.">      if (spans == null) {</span>
         // there were no traces, notify consumer there are now traces
-<span class="fc" id="L24">        notify();</span>
-<span class="fc" id="L25">        traces = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L25">        notify();</span>
+<span class="fc" id="L26">        spans = new ArrayList&lt;&gt;();</span>
       }
-<span class="fc" id="L27">      traces.add(trace);</span>
-<span class="pc" id="L28">    }</span>
-<span class="fc" id="L29">  }</span>
+<span class="fc" id="L28">      spans.add(span);</span>
+<span class="pc" id="L29">    }</span>
+<span class="fc" id="L30">  }</span>
 
   /**
    * Consume traces. Waits for traces as needed.
@@ -34,17 +35,17 @@ import org.honton.chas.datadog.apm.api.Trace;
    * @return All available traces
    * @throws InterruptedException
    */
-  public List&lt;Trace&gt; consume() throws InterruptedException {
-    List&lt;Trace&gt; rc;
-<span class="fc" id="L39">    synchronized (this) {</span>
+  public List&lt;Span&gt; consume() throws InterruptedException {
+    List&lt;Span&gt; rc;
+<span class="fc" id="L40">    synchronized (this) {</span>
       // wait for an available span
-<span class="fc bfc" id="L41" title="All 2 branches covered.">      while (traces == null) {</span>
-<span class="fc" id="L42">        wait();</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">      while (spans == null) {</span>
+<span class="fc" id="L43">        wait();</span>
       }
-<span class="fc" id="L44">      rc = traces;</span>
-<span class="fc" id="L45">      traces = null;</span>
-<span class="fc" id="L46">    }</span>
-<span class="fc" id="L47">    return rc;</span>
+<span class="fc" id="L45">      rc = spans;</span>
+<span class="fc" id="L46">      spans = null;</span>
+<span class="fc" id="L47">    }</span>
+<span class="fc" id="L48">    return rc;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.7.201606060606</span></div></body></html>

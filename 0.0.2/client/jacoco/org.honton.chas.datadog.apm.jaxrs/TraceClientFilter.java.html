@@ -38,7 +38,11 @@ import org.honton.chas.datadog.apm.Tracer;
   @Override
   public void filter(ClientRequestContext requestContext, ClientResponseContext responseContext)
     throws IOException {
-<span class="fc" id="L41">    tracer.closeCurrentSpan();</span>
-<span class="fc" id="L42">  }</span>
+<span class="fc" id="L41">    int status = responseContext.getStatus();</span>
+<span class="pc bpc" id="L42" title="3 of 4 branches missed.">    if(status&lt;200 || status&gt;=400) {</span>
+<span class="fc" id="L43">      tracer.getCurrentSpan().error(status);</span>
+    }
+<span class="fc" id="L45">    tracer.closeCurrentSpan();</span>
+<span class="fc" id="L46">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.7.201606060606</span></div></body></html>
