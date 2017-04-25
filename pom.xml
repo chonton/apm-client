@@ -4,7 +4,7 @@
 
   <groupId>org.honton.chas.datadog.apm</groupId>
   <artifactId>parent</artifactId>
-  <version>0.0.2</version>
+  <version>0.0.3</version>
   <packaging>pom</packaging>
 
   <name>${project.artifactId}</name>
@@ -592,7 +592,7 @@
     </profile>
 
     <!-- release to maven central
-    mvn clean deploy -pl client -P release
+    mvn clean deploy -pl client,. -P release
     -->
     <profile>
       <id>release</id>
