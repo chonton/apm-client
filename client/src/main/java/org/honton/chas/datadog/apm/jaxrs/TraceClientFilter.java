@@ -38,6 +38,10 @@ public class TraceClientFilter
   @Override
   public void filter(ClientRequestContext requestContext, ClientResponseContext responseContext)
     throws IOException {
+    int status = responseContext.getStatus();
+    if(status<200 || status>=400) {
+      tracer.getCurrentSpan().error(status);
+    }
     tracer.closeCurrentSpan();
   }
 }
