@@ -1,28 +1,25 @@
 package org.honton.chas.datadog.apm;
 
+import java.util.Collections;
+import java.util.Map;
 import org.honton.chas.datadog.apm.api.Span;
 import org.honton.chas.datadog.apm.api.Trace;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 public class SpanBuilderTest {
 
-  public static List<Trace> getTestTraces(String suffix) {
+  public static Trace[] getTestTraces(String suffix) {
     SpanBuilder root = SpanBuilder.createRoot();
-    root.operation("root_operation_" + suffix).resource("root-resource_" + suffix).type("http");
+    root.operation("root_operation_" + suffix).resource("root-resource_" + suffix).type(TraceOperation.WEB);
 
     SpanBuilder child = root.createChild();
-    child.operation("child_operation_" + suffix).resource("child_resource_" + suffix).type("sql");
+    child.operation("child_operation_" + suffix).resource("child_resource_" + suffix).type(TraceOperation.DB);
     Span childSpan = child.finishSpan("test-service");
 
     Span rootSpan = root.finishSpan("test-service");
     Trace trace = new Trace(childSpan, rootSpan);
-    return Arrays.asList(trace);
+    return new Trace[]{trace};
   }
 
   public static Span getTestSpan() {
@@ -78,7 +75,7 @@ public class SpanBuilderTest {
   public void testSetterGetter() {
     SpanBuilder builder = SpanBuilder.createRoot();
     Assert.assertEquals(0, builder.error());
-    Assert.assertEquals(10, builder.error(10).error());
+    Assert.assertEquals(1, builder.error(true).error());
 
     Assert.assertNull(builder.resource());
     Assert.assertEquals("resource", builder.resource("resource").resource());
@@ -97,6 +94,17 @@ public class SpanBuilderTest {
     Assert.assertNull(builder.metrics());
     Assert.assertSame(stringNumber, builder.metrics(stringNumber).metrics());
   }
+
+
+  @Test
+  public void testUnsetType() {
+    SpanBuilder builder = SpanBuilder.createRoot();
+    Assert.assertEquals(TraceOperation.UNKNOWN, builder.finishSpan("service").getType());
+
+    builder = SpanBuilder.createRoot().type("");
+    Assert.assertEquals(TraceOperation.UNKNOWN, builder.finishSpan("service").getType());
+  }
+
 
   @Test
   public void testSetException() {

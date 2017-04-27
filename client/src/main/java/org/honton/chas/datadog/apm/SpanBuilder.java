@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import lombok.AccessLevel;
 import org.honton.chas.datadog.apm.api.Span;
 
 import lombok.Getter;
@@ -84,6 +85,7 @@ public class SpanBuilder {
   /**
    * A error code that occurred for span
    */
+  @Setter(AccessLevel.NONE)
   private int error;
 
   /**
@@ -92,6 +94,11 @@ public class SpanBuilder {
   private final long start = System.nanoTime();
 
   private static final long WALL_OFFSET = TimeUnit.MILLISECONDS.toNanos(System.currentTimeMillis()) - System.nanoTime();
+
+  public SpanBuilder error(boolean error) {
+    this.error = error ?1 :0;
+    return this;
+  }
 
   /**
    * Add a metric.
@@ -174,7 +181,8 @@ public class SpanBuilder {
    */
   public Span finishSpan(String service) {
     return new Span(service, resource, operation,
-        traceId, parentId, spanId, type,
+        traceId, parentId, spanId,
+        type==null || type.isEmpty() ?TraceOperation.UNKNOWN :type,
         meta != null ? copyOf(meta) : null,
         metrics != null ? copyOf(metrics) : null,
         error,

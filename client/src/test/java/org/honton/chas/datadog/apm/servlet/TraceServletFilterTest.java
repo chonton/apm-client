@@ -73,7 +73,7 @@ public class TraceServletFilterTest {
     Span span = test("fdfd", "5a5a", 400);
     Assert.assertEquals(0xfdfdL, span.getTraceId());
     Assert.assertEquals(0x5a5aL, span.getParentId().longValue());
-    Assert.assertEquals(400, span.getError());
+    Assert.assertEquals(1, span.getError());
   }
 
 }

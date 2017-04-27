@@ -1,5 +1,6 @@
 package org.honton.chas.datadog.apm.interception;
 
+import org.honton.chas.datadog.apm.SpanBuilder;
 import org.honton.chas.datadog.apm.Tracer;
 import org.junit.After;
 import org.junit.Assert;
@@ -31,13 +32,23 @@ public class TraceOperationTest {
 
   @Test
   public void methodInheritsClassAnnotation() {
-    Long unexpected = tracer.getCurrentSpan().spanId();
-    Assert.assertNotEquals(unexpected, example.on());
+    final SpanBuilder span = tracer.getCurrentSpan();
+    Assert.assertNotEquals((Long) span.spanId(), example.on());
   }
 
   @Test
   public void methodDisablesClassAnnotation() {
-    Long expected = tracer.getCurrentSpan().spanId();
-    Assert.assertEquals(expected, example.off());
+    final SpanBuilder span = tracer.getCurrentSpan();
+    Assert.assertEquals((Long) span.spanId(), example.off());
+  }
+
+  @Test
+  public void methodInheritsType() {
+    Assert.assertEquals("example", example.inherits().type());
+  }
+
+  @Test
+  public void methodAltType() {
+    Assert.assertEquals("alt", example.alt().type());
   }
 }

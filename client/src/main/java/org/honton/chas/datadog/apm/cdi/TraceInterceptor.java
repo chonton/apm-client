@@ -18,7 +18,8 @@ import org.honton.chas.datadog.apm.TraceOperation;
 @Priority(Priorities.AUTHENTICATION-1)
 public class TraceInterceptor {
 
-  @Inject TracerImpl tracer;
+  @Inject
+  TracerImpl tracer;
 
   @AroundInvoke
   public Object invokeWithReporting(InvocationContext ctx) throws Exception {
@@ -30,8 +31,22 @@ public class TraceInterceptor {
       throw e;
     } finally {
       Method method = ctx.getMethod();
-      span.resource(method.getDeclaringClass().getCanonicalName()).operation(method.getName());
+      span
+        .resource(method.getDeclaringClass().getCanonicalName())
+        .operation(method.getName())
+        .type(getType(method));
       tracer.closeSpan(span);
     }
+  }
+
+  private static String getType(Method method) {
+    TraceOperation traceOperation = method.getAnnotation(TraceOperation.class);
+    if(traceOperation == null || traceOperation.type().isEmpty()) {
+      traceOperation = method.getDeclaringClass().getAnnotation(TraceOperation.class);
+      if (traceOperation == null || traceOperation.type().isEmpty()) {
+        return null;
+      }
+    }
+    return traceOperation.type();
   }
 }

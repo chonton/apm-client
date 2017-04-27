@@ -52,9 +52,7 @@ public class TraceServletFilter implements Filter {
       filterChain.doFilter(request, response);
     } finally {
       int status = resp.getStatus();
-      if(status<200 || status>=400) {
-        sb.error(status);
-      }
+      sb.error(status<200 || status>=400);
       tracer.closeSpan(sb);
     }
   }

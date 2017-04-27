@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.honton.chas.datadog.apm.SpanBuilder;
 import org.honton.chas.datadog.apm.TraceConfiguration;
+import org.honton.chas.datadog.apm.TraceOperation;
 import org.honton.chas.datadog.apm.Tracer;
 import org.honton.chas.datadog.apm.api.Span;
 import org.honton.chas.datadog.apm.sender.Writer;
@@ -132,7 +133,7 @@ public class TracerImpl implements Tracer {
    */
   @Override
   public void exportSpan(String resource, String operation, HeaderMutator headerAccessor) {
-    SpanBuilder span = createSpan(resource, operation).type("http");
+    SpanBuilder span = createSpan(resource, operation).type(TraceOperation.WEB);
     headerAccessor.setValue(TRACE_ID, Long.toHexString(span.traceId()));
     headerAccessor.setValue(SPAN_ID, Long.toHexString(span.spanId()));
   }

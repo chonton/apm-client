@@ -64,7 +64,7 @@ public class Span {
   private final Map<String,Number> metrics;
 
   /**
-   * An error code for the span
+   * Did the span have an error?  1 -> there was an error.
    */
   private final int error;
 

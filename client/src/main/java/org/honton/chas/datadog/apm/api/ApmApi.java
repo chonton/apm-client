@@ -1,8 +1,6 @@
 package org.honton.chas.datadog.apm.api;
 
-import java.util.List;
 import java.util.Map;
-
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -37,5 +35,5 @@ public interface ApmApi {
    */
   @PUT
   @Path("/traces")
-  String reportTraces(List<Trace> traces);
+  String reportTraces(Trace... traces);
 }

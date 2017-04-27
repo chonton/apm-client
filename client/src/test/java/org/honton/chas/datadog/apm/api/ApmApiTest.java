@@ -1,6 +1,7 @@
 package org.honton.chas.datadog.apm.api;
 
 import org.honton.chas.datadog.apm.SpanBuilderTest;
+import org.honton.chas.datadog.apm.TraceOperation;
 import org.honton.chas.datadog.apm.jackson.MsgPackProvider;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
@@ -61,8 +62,8 @@ public class ApmApiTest {
     ApmApi0_2 apmApi = getProxy(ApmApi0_2.class);
 
     Map<String, ServiceData> apps = new HashMap<>();
-    apps.put("tw-name", new ServiceData("tw", "web"));
-    apps.put("td-name", new ServiceData("td", "database"));
+    apps.put("tw-name", new ServiceData("tw", TraceOperation.WEB));
+    apps.put("td-name", new ServiceData("td", TraceOperation.DB));
     String serviceOK = apmApi.reportServices(apps);
     Assert.assertEquals(ApmApi.SUCCESS, serviceOK);
   }

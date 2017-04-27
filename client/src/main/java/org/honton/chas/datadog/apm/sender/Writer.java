@@ -1,6 +1,5 @@
 package org.honton.chas.datadog.apm.sender;
 
-import java.util.Collections;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -75,7 +74,7 @@ public class Writer {
    *
    * @return false, if worker worker has been shutdown
    */
-  List<Span> consumeAndSend() {
+  List<Span> deQueue() {
     try {
       return queue.consume();
     } catch (InterruptedException ie) {
@@ -86,8 +85,13 @@ public class Writer {
 
   private void trySend(List<Span> spans) {
     if (System.currentTimeMillis() > backoffExpiration) {
+      Trace[] traces = new Trace[spans.size()];
+      int i = 0;
+      for(Span span : spans) {
+        traces[i++] = new Trace(span);
+      }
       try {
-        send(spans);
+        send(traces);
       } catch (RuntimeException re) {
         log.info("writer worker problem sending to " + apmUri, re);
         backoffExpiration = System.currentTimeMillis() + backoffDuration;
@@ -95,23 +99,21 @@ public class Writer {
     }
   }
 
-  private void send(List<Span> spans) {
+  private void send(Trace... traces) {
     try {
-      final List<Trace> traces = Collections.singletonList(new Trace(spans));
       apmApi.reportTraces(traces);
     } catch (NotFoundException | NotSupportedException cee) {
       // 404, 415
       if (apmApi instanceof ApmApi0_3) {
         log.info("falling back to json");
         fallbackTo0_2();
-        send(spans);
+        send(traces);
       }
     }
   }
 
   private void fallbackTo0_2() {
     apmApi = getProxy(ApmApi0_2.class);
-    backoffExpiration = 0;
   }
 
   private void initializeWith0_3() {
@@ -127,7 +129,7 @@ public class Writer {
       @Override
       public void run() {
         for(;;) {
-          List<Span> spans = consumeAndSend();
+          List<Span> spans = deQueue();
           if(spans == null) {
             log.error("writer worker shutdown");
             break;
