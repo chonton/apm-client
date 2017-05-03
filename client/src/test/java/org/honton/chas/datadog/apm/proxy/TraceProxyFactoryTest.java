@@ -13,10 +13,10 @@ import java.util.concurrent.Callable;
 /**
  * Test proxy creation
  */
-public class ProxyFactoryTest {
+public class TraceProxyFactoryTest {
 
   private TracerTestImpl tracer;
-  private ProxyFactory proxyFactory;
+  private TraceProxyFactory traceProxyFactory;
 
   public interface Consumer<T> {
     void accept(T t);
@@ -53,13 +53,13 @@ public class ProxyFactoryTest {
   @Before
   public void setupTracer() {
     tracer = new TracerTestImpl();
-    proxyFactory = new ProxyFactory();
-    proxyFactory.tracer = tracer;
+    traceProxyFactory = new TraceProxyFactory();
+    traceProxyFactory.tracer = tracer;
   }
 
   private Span test(String response) throws Exception {
     Sample instance = new Sample();
-    Consumer<String> proxy = proxyFactory.createProxy(instance, Consumer.class);
+    Consumer<String> proxy = traceProxyFactory.createProxy(instance, Consumer.class);
     try {
       proxy.accept(response);
       Assert.assertEquals(response, instance.getSaved());
@@ -88,7 +88,7 @@ public class ProxyFactoryTest {
   @Test
   public void testMultiInterface() throws Exception {
     Sample instance = new Sample();
-    Object proxy = proxyFactory.createProxy(instance, Consumer.class, Callable.class);
+    Object proxy = traceProxyFactory.createProxy(instance, Consumer.class, Callable.class);
 
     ((Consumer)proxy).accept("hello");
     Span span = tracer.getCapturedSpan();
@@ -106,7 +106,7 @@ public class ProxyFactoryTest {
   @Test
   public void testNoTrace() throws Exception {
     Sample instance = new Sample();
-    Repeat proxy = proxyFactory.createProxy(instance, Repeat.class);
+    Repeat proxy = traceProxyFactory.createProxy(instance, Repeat.class);
     Assert.assertEquals("xx", proxy.echo("xx"));
 
     Assert.assertNull(tracer.getCapturedSpan());

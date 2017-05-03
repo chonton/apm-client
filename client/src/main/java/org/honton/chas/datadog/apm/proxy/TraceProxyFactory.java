@@ -12,7 +12,7 @@ import java.lang.reflect.*;
  * Factory that creates instance wrappers which report spans.  Create proxies for those instances
  * that are not constructed by CDI.
  */
-public class ProxyFactory {
+public class TraceProxyFactory {
 
   @Inject
   Tracer tracer;

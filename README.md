@@ -158,7 +158,7 @@ The outgoing requests includes **x-ddtrace-parent_trace_id** and **x-ddtrace-par
 indicating that new span.  Once the request has completed, the span is closed and sent to Datadog APM.
 
 ```java
-public class ProxyFactory {
+public class ClientProxyFactory {
 
   private ResteasyClientBuilder clientBuilder;
 
@@ -202,7 +202,7 @@ public class ExampleBean {
 }
 ```
 
-## ProxyFactory
+## TraceProxyFactory
 Occasionally, you will need to intercept operations on non-cdi instances.  In this case, you can 
 create a proxy which will create a new span before invoking any interface method and close the span
 once the invocation is complete.
@@ -210,7 +210,7 @@ once the invocation is complete.
 public class BeanFactory {
   
   @Inject
-  ProxyFactory proxyFactory;
+  TraceProxyFactory proxyFactory;
   
   @Produces
   public NonCdi factoryMethod() {

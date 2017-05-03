@@ -3,6 +3,8 @@ package org.honton.chas.datadog.apm;
 import org.honton.chas.datadog.apm.cdi.TraceInterceptor;
 import org.honton.chas.datadog.apm.jaxrs.TraceContainerFilter;
 
+import org.honton.chas.datadog.apm.proxy.TraceProxyFactory;
+
 import javax.enterprise.util.Nonbinding;
 import javax.interceptor.InterceptorBinding;
 import java.lang.annotation.ElementType;
@@ -12,7 +14,7 @@ import java.lang.annotation.Target;
 
 /**
  * Marker annotation to indicate method or type should be traced.
- * This marker will be honored on by {@link TraceContainerFilter} and {@link TraceInterceptor)
+ * This marker will be honored by {@link TraceContainerFilter}, {@link TraceProxyFactory} and {@link TraceInterceptor)
  */
 @InterceptorBinding
 @Target({ElementType.TYPE, ElementType.METHOD})
