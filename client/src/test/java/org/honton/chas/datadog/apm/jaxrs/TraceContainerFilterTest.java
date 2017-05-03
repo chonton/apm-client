@@ -26,6 +26,7 @@ public class TraceContainerFilterTest {
     ResourceInfo resourceInfo  = Mockito.mock(ResourceInfo.class);
     Method method = TraceContainerFilterTest.class.getMethod("testNoClientTrace");
     Mockito.when(resourceInfo.getResourceMethod()).thenReturn(method);
+    Mockito.when(resourceInfo.getResourceClass()).thenReturn((Class)method.getDeclaringClass());
 
     TraceContainerFilter scf = new TraceContainerFilter();
     scf.setTracer(tracer);

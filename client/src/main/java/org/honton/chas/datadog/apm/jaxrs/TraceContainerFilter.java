@@ -1,23 +1,20 @@
 package org.honton.chas.datadog.apm.jaxrs;
 
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.net.URI;
-import javax.inject.Inject;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.container.ContainerResponseContext;
-import javax.ws.rs.container.ContainerResponseFilter;
-import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.ext.Provider;
 import org.honton.chas.datadog.apm.SpanBuilder;
 import org.honton.chas.datadog.apm.TraceOperation;
 import org.honton.chas.datadog.apm.Tracer;
 
+import javax.inject.Inject;
+import javax.ws.rs.container.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.ext.Provider;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.net.URI;
+
 /**
- * Trace export for jaxrs implementations
+ * Trace import for jaxrs implementations
  */
 @Provider
 public class TraceContainerFilter implements ContainerRequestFilter, ContainerResponseFilter {
@@ -35,7 +32,14 @@ public class TraceContainerFilter implements ContainerRequestFilter, ContainerRe
   private boolean shouldTrace() {
     Method resourceMethod = resourceInfo.getResourceMethod();
     TraceOperation traceOperation = resourceMethod.getAnnotation(TraceOperation.class);
-    return traceOperation == null || traceOperation.value();
+    if (traceOperation == null) {
+      Class<?> resourceClass = resourceInfo.getResourceClass();
+      traceOperation = resourceClass.getAnnotation(TraceOperation.class);
+      if (traceOperation == null) {
+        return true;
+      }
+    }
+    return traceOperation.value();
   }
 
   @Override

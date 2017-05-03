@@ -6,7 +6,10 @@ import org.honton.chas.datadog.apm.TraceOperation;
 import org.honton.chas.datadog.apm.Tracer;
 
 import javax.inject.Inject;
-import java.lang.reflect.*;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 /**
  * Factory that creates instance wrappers which report spans.  Create proxies for those instances
@@ -45,12 +48,22 @@ public class TraceProxyFactory {
     return Proxy.newProxyInstance(instance.getClass().getClassLoader(), ifaces, handler);
   }
 
+  private static boolean shouldTrace(Method method) {
+    TraceOperation traceOperation = method.getAnnotation(TraceOperation.class);
+    if (traceOperation == null) {
+      traceOperation = method.getDeclaringClass().getAnnotation(TraceOperation.class);
+      if (traceOperation == null) {
+        return true;
+      }
+    }
+    return traceOperation.value();
+  }
+
   private InvocationHandler createInvocationHandler(final Object instance) {
     return new InvocationHandler() {
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-          TraceOperation traceOperation = method.getAnnotation(TraceOperation.class);
-          if(traceOperation != null && !traceOperation.value()) {
+          if(!shouldTrace(method)) {
             return method.invoke(instance, args);
           }
 
@@ -71,3 +84,4 @@ public class TraceProxyFactory {
       };
   }
 }
+
