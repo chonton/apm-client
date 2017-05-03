@@ -1,14 +1,11 @@
 package org.honton.chas.datadog.apm.example.server;
 
-import java.util.EnumSet;
-import javax.servlet.DispatcherType;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.honton.chas.datadog.apm.servlet.TraceServletFilter;
 
 /**
  * Start an embedded Jetty server
@@ -29,9 +26,6 @@ public class HelloMain {
 
     // Use Weld to inject into servlets
     context.addEventListener(new org.jboss.weld.environment.servlet.Listener());
-
-    // Add the Tracing Filter
-    context.addFilter(TraceServletFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
 
     jettyServer = new Server(port);
     jettyServer.setHandler(context);

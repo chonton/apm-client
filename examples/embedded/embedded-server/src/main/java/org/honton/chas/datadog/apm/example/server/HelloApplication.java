@@ -5,6 +5,7 @@ import java.util.Set;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 import org.glassfish.jersey.jackson.JacksonFeature;
+import org.honton.chas.datadog.apm.jaxrs.TraceContainerFilter;
 
 @ApplicationPath("/")
 public class HelloApplication extends Application {
@@ -22,7 +23,8 @@ public class HelloApplication extends Application {
     // Register the infrastructure endpoint
     classes.add(HealthService.class);
 
-    // the Tracing filter is added in HelloMain
+    // the Tracing filter
+    classes.add(TraceContainerFilter.class);
 
     return classes;
   }

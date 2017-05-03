@@ -87,14 +87,19 @@ public class HelloIT {
 
   @After
   public void verifyMockWasCalled() throws InterruptedException, IOException {
-    List<Span> spans = getSpans(3);
+    List<Span> spans = getSpans(4);
+    Assert.assertEquals(4, spans.size());
 
+    Span echo = null;
     Span intercepted = null;
     Span client = null;
     Span server = null;
 
     for(Span span : spans) {
-      if(span.getOperation().equals("kr")) {
+      if(span.getOperation().endsWith("echo")) {
+        echo = span;
+      }
+      else if(span.getOperation().equals("kr")) {
         intercepted = span;
       }
       else if( span.getService().equals("greetings-server")){
@@ -104,13 +109,18 @@ public class HelloIT {
       }
     }
 
+    Assert.assertEquals("CS:localhost:5555", echo.getResource());
+    Assert.assertEquals("GET:/echo", echo.getOperation());
+    Assert.assertEquals(echo.getTraceId(), echo.getSpanId());
+    Assert.assertNull(echo.getParentId());
+
     Assert.assertEquals("CS:localhost:5555", client.getResource());
     Assert.assertEquals("GET:/greetings", client.getOperation());
     Assert.assertEquals(client.getTraceId(), client.getSpanId());
     Assert.assertNull(client.getParentId());
 
     Assert.assertEquals("SR:localhost:5555", server.getResource());
-    Assert.assertEquals("GET:/greetings", server.getOperation());
+    Assert.assertEquals("GET:greetings", server.getOperation());
     Assert.assertEquals(client.getTraceId(), server.getTraceId());
     Assert.assertEquals(client.getSpanId(), (long)server.getParentId());
 
@@ -122,6 +132,9 @@ public class HelloIT {
 
   @Test
   public void testCallService() {
-    Assert.assertEquals("Hello World!", getHello().greeting());
+    final Hello hello = getHello();
+    Assert.assertNotNull(hello);
+    Assert.assertEquals("Hello World!", hello.greeting());
+    Assert.assertEquals("kjh", hello.echo("kjh"));
   }
 }

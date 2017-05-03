@@ -1,5 +1,6 @@
 package org.honton.chas.datadog.apm;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -19,10 +20,10 @@ public @interface TraceOperation {
 
   /**
    * Type of span to create.  Usually something like 'web' or 'db'
+   *
    * @return The type of span.
    */
-  @Nonbinding
-  String type() default "";
+  @Nonbinding String type() default "";
 
   /**
    * The predefined type for http/https spans

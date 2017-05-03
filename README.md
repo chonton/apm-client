@@ -61,6 +61,9 @@ public class TraceConfigurationFactory {
 }
 ```
 
+## Servlet or Container Filter
+On the server side, you can either use TraceServletFilter or TraceContainerFilter to traces incoming requests.
+
 ## TraceServletFilter
 The TraceServletFilter traces every incoming request.  If the client request includes the
 **x-ddtrace-parent_trace_id** and **x-ddtrace-parent_span_id** headers, that indicated span is used as
@@ -119,6 +122,34 @@ Register TraceServletFilter, weld, and Jax-Rs application in the web.xml:
     addJaxRsApplication(HelloApplication.class);
     start();
   }
+```
+
+## TraceContainerFilter
+The TraceContainerFilter traces every incoming jax-rs request.  If the client request includes the
+**x-ddtrace-parent_trace_id** and **x-ddtrace-parent_span_id** headers, that indicated span is used as
+the parent trace and span.  Otherwise, a new trace is created.  Once the request is complete, the
+new span or trace is closed and sent to Datadog APM.
+
+### Registration
+The TraceContainerFilter must be registered with the jax-rs runtime.  This can be done during startup as
+part of the Application class.
+```java
+@ApplicationPath("/")
+public class HellloApplication extends Application {
+
+  @Override
+  public Set<Class<?>> getClasses() {
+    Set<Class<?>> classes = new HashSet<>();
+
+    // Register the service endpoint
+    classes.add(HelloService.class);
+
+    // the Tracing filter
+    classes.add(TraceContainerFilter.class);
+
+    return classes;
+  }
+}
 ```
 
 ## TraceClientFilter
