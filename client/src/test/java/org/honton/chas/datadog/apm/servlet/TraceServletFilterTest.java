@@ -55,16 +55,17 @@ public class TraceServletFilterTest {
 
     Span span = tracer.getCapturedSpan();
     Assert.assertEquals("service", span.getService());
-    Assert.assertEquals("SR:example.com:7110", span.getResource());
-    Assert.assertEquals("GET:/some/path", span.getOperation());
+    Assert.assertEquals("GET /some/path", span.getResource());
+    Assert.assertEquals("example.com:7110", span.getOperation());
     return span;
   }
 
   @Test
   public void testNoClientTrace() throws IOException, ServletException {
     Span span = test(null, null, 200);
-    Assert.assertEquals(span.getTraceId(), span.getSpanId());
     Assert.assertNull(span.getParentId());
+    Assert.assertNotNull(span.getTraceId());
+    Assert.assertNotNull(span.getSpanId());
     Assert.assertEquals(0, span.getError());
   }
 

@@ -160,8 +160,7 @@ public class SpanBuilder {
    * @return A builder for a root span
    */
   public static SpanBuilder createRoot() {
-    long traceId = createId();
-    return new SpanBuilder(null, traceId, null, traceId);
+    return new SpanBuilder(null, createId(), null, createId());
   }
 
   /**
@@ -182,15 +181,19 @@ public class SpanBuilder {
   public Span finishSpan(String service) {
     return new Span(service, resource, operation,
         traceId, parentId, spanId,
-        type==null || type.isEmpty() ?TraceOperation.UNKNOWN :type,
-        meta != null ? copyOf(meta) : null,
-        metrics != null ? copyOf(metrics) : null,
+        typeOrDefault(),
+        copyOf(meta),
+        copyOf(metrics),
         error,
         WALL_OFFSET + start, System.nanoTime() - start);
   }
 
+  private final String typeOrDefault() {
+    return type==null || type.isEmpty() ?TraceOperation.UNKNOWN :type;
+  }
+
   private static <K,V> Map<K,V> copyOf(Map<K,V> map) {
-    return Collections.unmodifiableMap(new HashMap<>(map));
+    return map != null ?Collections.unmodifiableMap(new HashMap<>(map)) : null;
   }
 
   /**

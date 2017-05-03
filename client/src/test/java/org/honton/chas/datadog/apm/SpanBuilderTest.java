@@ -14,7 +14,7 @@ public class SpanBuilderTest {
     root.operation("root_operation_" + suffix).resource("root-resource_" + suffix).type(TraceOperation.WEB);
 
     SpanBuilder child = root.createChild();
-    child.operation("child_operation_" + suffix).resource("child_resource_" + suffix).type(TraceOperation.DB);
+    child.operation("child_operation_" + suffix).resource("child_resource_" + suffix).type(TraceOperation.SQL);
     Span childSpan = child.finishSpan("test-service");
 
     Span rootSpan = root.finishSpan("test-service");
@@ -39,7 +39,8 @@ public class SpanBuilderTest {
     Span rootSpan = rootBuilder.finishSpan("service");
 
     Assert.assertNull(rootSpan.getParentId());
-    Assert.assertEquals(rootSpan.getTraceId(), rootSpan.getSpanId());
+    Assert.assertNotNull(rootSpan.getTraceId());
+    Assert.assertNotNull(rootSpan.getSpanId());
 
     Assert.assertEquals(rootSpan.getSpanId(), childSpan.getParentId().longValue());
     Assert.assertEquals(rootSpan.getTraceId(), childSpan.getTraceId());

@@ -104,13 +104,14 @@ public class HelloIT {
       }
     }
 
-    Assert.assertEquals("CS:localhost:5555", client.getResource());
-    Assert.assertEquals("GET:/greetings", client.getOperation());
-    Assert.assertEquals(client.getTraceId(), client.getSpanId());
+    Assert.assertEquals("GET /greetings", client.getResource());
+    Assert.assertEquals("localhost:5555", client.getOperation());
+    Assert.assertNotNull(client.getTraceId());
+    Assert.assertNotNull(client.getSpanId());
     Assert.assertNull(client.getParentId());
 
-    Assert.assertEquals("SR:localhost:5555", server.getResource());
-    Assert.assertEquals("GET:/greetings", server.getOperation());
+    Assert.assertEquals("GET /greetings", server.getResource());
+    Assert.assertEquals("localhost:5555", server.getOperation());
     Assert.assertEquals(client.getTraceId(), server.getTraceId());
     Assert.assertEquals(client.getSpanId(), (long)server.getParentId());
 

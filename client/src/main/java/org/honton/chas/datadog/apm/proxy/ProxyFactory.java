@@ -49,6 +49,11 @@ public class ProxyFactory {
     return new InvocationHandler() {
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+          TraceOperation traceOperation = method.getAnnotation(TraceOperation.class);
+          if(traceOperation != null && !traceOperation.value()) {
+            return method.invoke(instance, args);
+          }
+
           SpanBuilder span = tracer.createSpan();
           try {
             return method.invoke(instance, args);

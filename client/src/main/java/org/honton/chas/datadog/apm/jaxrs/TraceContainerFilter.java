@@ -47,8 +47,8 @@ public class TraceContainerFilter implements ContainerRequestFilter, ContainerRe
 
       UriInfo uriInfo = req.getUriInfo();
       URI uri = uriInfo.getRequestUri();
-      sb.resource("SR:" + uri.getHost() + ':' + uri.getPort())
-        .operation(req.getMethod() + ':' + uriInfo.getPath());
+      sb.resource(req.getMethod() + ' ' + uriInfo.getPath())
+          .operation(uri.getHost() + ':' + uri.getPort());
     }
   }
 

@@ -46,8 +46,8 @@ public class TraceServletFilter implements Filter {
       }
     });
     try {
-      sb.resource("SR:" + req.getServerName() + ':' + req.getServerPort())
-        .operation(req.getMethod() + ':' + URLDecoder.decode(req.getRequestURI(), "UTF-8"))
+      sb.resource(req.getMethod() + ' ' + URLDecoder.decode(req.getRequestURI(), "UTF-8"))
+        .operation(req.getServerName() + ':' + req.getServerPort())
         .type(req.getScheme());
       filterChain.doFilter(request, response);
     } finally {

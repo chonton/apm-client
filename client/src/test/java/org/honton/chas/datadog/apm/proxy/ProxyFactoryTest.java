@@ -1,6 +1,7 @@
 package org.honton.chas.datadog.apm.proxy;
 
 import lombok.Getter;
+import org.honton.chas.datadog.apm.TraceOperation;
 import org.honton.chas.datadog.apm.api.Span;
 import org.honton.chas.datadog.apm.cdi.TracerTestImpl;
 import org.junit.Assert;
@@ -21,7 +22,12 @@ public class ProxyFactoryTest {
     void accept(T t);
   }
 
-  static class Sample implements Callable<String>, Consumer<String> {
+  public interface Repeat {
+    @TraceOperation(false)
+    String echo(String t);
+  }
+
+  static class Sample implements Callable<String>, Consumer<String>, Repeat {
     @Getter
     private String saved;
 
@@ -36,6 +42,11 @@ public class ProxyFactoryTest {
     @Override
     public String call() throws Exception {
       return saved;
+    }
+
+    @Override
+    public String echo(String t) {
+      return t;
     }
   }
 
@@ -90,5 +101,14 @@ public class ProxyFactoryTest {
     Assert.assertEquals("service", span.getService());
     Assert.assertEquals(Callable.class.getCanonicalName(), span.getResource());
     Assert.assertEquals("call", span.getOperation());
+  }
+
+  @Test
+  public void testNoTrace() throws Exception {
+    Sample instance = new Sample();
+    Repeat proxy = proxyFactory.createProxy(instance, Repeat.class);
+    Assert.assertEquals("xx", proxy.echo("xx"));
+
+    Assert.assertNull(tracer.getCapturedSpan());
   }
 }
