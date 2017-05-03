@@ -1,6 +1,7 @@
 package org.honton.chas.datadog.apm.jaxrs;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.URI;
 import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -32,7 +33,8 @@ public class TraceContainerFilter implements ContainerRequestFilter, ContainerRe
   ResourceInfo resourceInfo;
 
   private boolean shouldTrace() {
-    TraceOperation traceOperation = resourceInfo.getResourceMethod().getAnnotation(TraceOperation.class);
+    Method resourceMethod = resourceInfo.getResourceMethod();
+    TraceOperation traceOperation = resourceMethod.getAnnotation(TraceOperation.class);
     return traceOperation == null || traceOperation.value();
   }
 
