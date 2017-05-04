@@ -4,7 +4,9 @@ import org.honton.chas.datadog.apm.SpanBuilder;
 import org.honton.chas.datadog.apm.TraceOperation;
 import org.honton.chas.datadog.apm.Tracer;
 
+import javax.annotation.Priority;
 import javax.inject.Inject;
+import javax.ws.rs.Priorities;
 import javax.ws.rs.container.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
@@ -17,6 +19,7 @@ import java.net.URI;
  * Trace import for jaxrs implementations
  */
 @Provider
+@Priority(Priorities.AUTHENTICATION-1)
 public class TraceContainerFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
   private Tracer tracer;
