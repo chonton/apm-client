@@ -20,19 +20,12 @@ import java.util.concurrent.Callable;
 @Slf4j
 public class TracerImpl implements Tracer {
 
-  private final SpanBuilder.Augmenter DO_NOTHING = new SpanBuilder.Augmenter() {
-    @Override
-    public void augment(SpanBuilder spanBuilder) {
-    }
-  };
-
   private final ThreadLocal<SpanBuilder> CURRENT_SPAN = new ThreadLocal<>();
 
   @Inject
   private Writer writer;
 
   private String service;
-  private SpanBuilder.Augmenter augmenter;
 
   public TracerImpl() {
   }
@@ -40,10 +33,6 @@ public class TracerImpl implements Tracer {
   @Inject
   void setTraceConfiguration(TraceConfiguration configuration) {
     service = configuration.getService();
-    augmenter = configuration.getAugmenter();
-    if(augmenter == null) {
-      augmenter = DO_NOTHING;
-    }
   }
 
   /**
@@ -99,6 +88,18 @@ public class TracerImpl implements Tracer {
     return CURRENT_SPAN.get();
   }
 
+  @Override
+  public SpanBuilder.SpanContext exportCurrentSpan() {
+    return CURRENT_SPAN.get().exportSpan();
+  }
+
+  @Override
+  public SpanBuilder importCurrentSpan(SpanBuilder.SpanContext spanContext) {
+    SpanBuilder span = spanContext.importSpan();
+    CURRENT_SPAN.set(span);
+    return span;
+  }
+
   /**
    * Import a span across process boundaries using a set of headers.
    * If trace headers are not provided, creates a new root span.
@@ -118,7 +119,6 @@ public class TracerImpl implements Tracer {
       long spanId = Long.parseLong(headerAccessor.getValue(SPAN_ID), 16);
       current = SpanBuilder.createChild(traceId, spanId);
     }
-    augmenter.augment(current);
     CURRENT_SPAN.set(current);
     return current;
   }
@@ -148,7 +148,6 @@ public class TracerImpl implements Tracer {
   public SpanBuilder createSpan() {
     SpanBuilder parent = CURRENT_SPAN.get();
     SpanBuilder span = parent == null ? SpanBuilder.createRoot() : parent.createChild();
-    augmenter.augment(span);
     CURRENT_SPAN.set(span);
     return span;
   }

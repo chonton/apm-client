@@ -25,13 +25,4 @@ public class TraceConfiguration {
    * The number of milliseconds that collection is squelched after communication failure
    */
   private long backoffDuration;
-
-  /**
-   * Invoked whenever a span is created
-   */
-  private SpanBuilder.Augmenter augmenter;
-
-  public TraceConfiguration(String service, String collectorUrl, long backoffDuration) {
-    this(service, collectorUrl, backoffDuration, null);
-  }
 }

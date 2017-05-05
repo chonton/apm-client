@@ -1,5 +1,12 @@
 package org.honton.chas.datadog.apm;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+import org.honton.chas.datadog.apm.api.Span;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collections;
@@ -7,14 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-
-import lombok.AccessLevel;
-import org.honton.chas.datadog.apm.api.Span;
-
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.Accessors;
 
 /**
  * An active Span builder.  Provides methods to get and set the Span attributes.
@@ -26,17 +25,6 @@ import lombok.experimental.Accessors;
 @Setter
 @RequiredArgsConstructor
 public class SpanBuilder {
-
-  /**
-   * A callback used to augment newly constructed Spans
-   */
-  public interface Augmenter {
-    /**
-     * Add information to the span before submitting to APM
-     * @param spanBuilder The span builder to augment
-     */
-    void augment(SpanBuilder spanBuilder);
-  }
 
   private static final Random ID_GENERATOR = new Random();
 
@@ -188,7 +176,7 @@ public class SpanBuilder {
         WALL_OFFSET + start, System.nanoTime() - start);
   }
 
-  private final String typeOrDefault() {
+  private String typeOrDefault() {
     return type==null || type.isEmpty() ?TraceOperation.UNKNOWN :type;
   }
 
@@ -215,5 +203,18 @@ public class SpanBuilder {
     StringWriter errors = new StringWriter();
     ex.printStackTrace(new PrintWriter(errors));
     return errors.toString();
+  }
+
+  public SpanContext exportSpan() {
+    return new SpanContext();
+  }
+
+  /**
+   * The context of an active Span builder.  Used to transfer context from one thread to another.
+   */
+  public class SpanContext {
+    public SpanBuilder importSpan() {
+      return new SpanBuilder(null, traceId, spanId, createId());
+    }
   }
 }

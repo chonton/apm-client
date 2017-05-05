@@ -26,8 +26,7 @@ public class TraceClientFilter implements ClientRequestFilter, ClientResponseFil
 
   public void filter(final ClientRequestContext req) throws IOException {
     URI uri = req.getUri();
-    tracer.exportSpan(req.getMethod() + ' ' + uri.getPath(),
-        uri.getHost() + ':' + uri.getPort(),
+    tracer.exportSpan(uri.getHost() + ':' + uri.getPort(), req.getMethod() + ' ' + uri.getPath(),
         new Tracer.HeaderMutator() {
         @Override
         public void setValue(String name, String value) {

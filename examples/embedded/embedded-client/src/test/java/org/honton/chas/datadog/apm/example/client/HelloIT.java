@@ -33,30 +33,33 @@ public class HelloIT {
 
   private static final ObjectMapper MAPPER = new ObjectMapper();
   private static final TypeReference<List<List<Span>>> LIST_LIST_SPAN =
-    new TypeReference<List<List<Span>>>() {};
+      new TypeReference<List<List<Span>>>() {
+      };
 
   Hello getHello() {
     return proxyFactory.getProxy("http://localhost:5555", Hello.class);
   }
 
-  //@Before
+  @Before
   public void emulateV0_2() {
-    MockServerClient client = new MockServerClient("localhost", APM_PORT)
-      .reset();
+    MockServerClient client = new MockServerClient("localhost", APM_PORT).reset();
 
-    client
-      .when(HttpRequest.request().withMethod("PUT").withPath("/v0.3/traces"),
-          Times.unlimited(), TimeToLive.exactly(TimeUnit.MINUTES, 1l))
-      .respond(HttpResponse.response().withStatusCode(404)
-        .withHeaders(new Header("Content-Type", "text/plain"))
-    );
+    client.when(
+        HttpRequest.request()
+            .withMethod("PUT")
+            .withPath("/v0.3/traces"), Times.unlimited(), TimeToLive.exactly(TimeUnit.MINUTES, 1l))
+        .respond(HttpResponse.response()
+            .withStatusCode(404)
+            .withHeaders(new Header("Content-Type", "text/plain")));
 
-    client
-      .when(HttpRequest.request().withMethod("PUT").withPath("/v0.2/traces"),
-        Times.unlimited(), TimeToLive.exactly(TimeUnit.MINUTES, 1l))
-      .respond(HttpResponse.response().withStatusCode(200)
-        .withHeaders(new Header("Content-Type", "text/plain")).withBody("OK\n")
-        .withDelay(new Delay(TimeUnit.MILLISECONDS, 20)));
+    client.when(
+        HttpRequest.request()
+            .withMethod("PUT")
+            .withPath("/v0.2/traces"), Times.unlimited(), TimeToLive.exactly(TimeUnit.MINUTES, 1l))
+        .respond(HttpResponse.response()
+            .withStatusCode(200)
+            .withHeaders(new Header("Content-Type", "text/plain"))
+            .withBody("OK\n").withDelay(new Delay(TimeUnit.MILLISECONDS, 20)));
   }
 
   private List<Span> requestsToSpans(HttpRequest[] requests) throws IOException {
@@ -64,8 +67,8 @@ public class HelloIT {
     for (HttpRequest request : requests) {
       String body = request.getBodyAsString();
       List<List<Span>> traces = MAPPER.readValue(body, LIST_LIST_SPAN);
-      for(List<Span> trace : traces) {
-        for(Span span : trace) {
+      for (List<Span> trace : traces) {
+        for (Span span : trace) {
           spans.add(span);
         }
       }
@@ -86,7 +89,7 @@ public class HelloIT {
     throw new AssertionError("Did not get " + count + " spans within 10 seconds");
   }
 
-  //@After
+  @After
   public void verifyMockWasCalled() throws InterruptedException, IOException {
     List<Span> spans = getSpans(4);
     Assert.assertEquals(4, spans.size());
@@ -95,41 +98,49 @@ public class HelloIT {
     Span intercepted = null;
     Span client = null;
     Span server = null;
-
-    for(Span span : spans) {
-      if(span.getOperation().endsWith("echo")) {
-        echo = span;
-      }
-      else if(span.getOperation().equals("kr")) {
-        intercepted = span;
-      }
-      else if( span.getService().equals("greetings-server")){
-        server = span;
-      } else if( span.getService().equals("greetings-client")){
-        client = span;
+    /*
+    Span(service=greetings-server, resource=Greeting, operation=kr, type=unknown)
+    Span(service=greetings-server, resource=HelloService, operation=greeting, type=unknown)
+    Span(service=greetings-client, resource=localhost:5555, operation=GET /greetings, type=web)
+    Span(service=greetings-client, resource=localhost:5555, operation=GET /echo, type=web)
+     */
+    for (Span span : spans) {
+      if (span.getService().equals("greetings-server")) {
+        if (span.getResource().equals("HelloService")) {
+          server = span;
+        } else {
+          intercepted = span;
+        }
+      } else if (span.getService().equals("greetings-client")) {
+        if (span.getOperation().equals("GET /echo")) {
+          echo = span;
+        } else {
+          client = span;
+        }
       }
     }
 
-    Assert.assertEquals("GET /echo", echo.getResource());
-    Assert.assertEquals("localhost:5555", echo.getOperation());
+    Assert.assertEquals("localhost:5555", echo.getResource());
+    Assert.assertEquals("GET /echo", echo.getOperation());
     Assert.assertNotNull(echo.getSpanId());
     Assert.assertNull(echo.getParentId());
 
-    Assert.assertEquals("GET /greetings", client.getResource());
-    Assert.assertEquals("localhost:5555", client.getOperation());
+    Assert.assertEquals("localhost:5555", client.getResource());
+    Assert.assertEquals("GET /greetings", client.getOperation());
     Assert.assertNotNull(client.getTraceId());
     Assert.assertNotNull(client.getSpanId());
     Assert.assertNull(client.getParentId());
 
-    Assert.assertEquals("GET /greetings", server.getResource());
-    Assert.assertEquals("localhost:5555", server.getOperation());
+    Assert.assertEquals("HelloService", server.getResource());
+    Assert.assertEquals("greeting", server.getOperation());
     Assert.assertEquals(client.getTraceId(), server.getTraceId());
-    Assert.assertEquals(client.getSpanId(), (long)server.getParentId());
+    Assert.assertEquals(client.getSpanId(), (long) server.getParentId());
 
     Assert.assertEquals("greetings-server", intercepted.getService());
-    Assert.assertEquals("org.honton.chas.datadog.apm.example.server.Greeting", intercepted.getResource());
+    Assert.assertEquals("Greeting", intercepted.getResource());
+    Assert.assertEquals("kr", intercepted.getOperation());
     Assert.assertEquals(server.getTraceId(), intercepted.getTraceId());
-    Assert.assertEquals(server.getSpanId(), (long)intercepted.getParentId());
+    Assert.assertEquals(server.getSpanId(), (long) intercepted.getParentId());
   }
 
   @Test

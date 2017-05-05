@@ -1,6 +1,7 @@
 package org.honton.chas.datadog.apm.interception;
 
 import org.honton.chas.datadog.apm.SpanBuilder;
+import org.honton.chas.datadog.apm.TraceOperation;
 import org.honton.chas.datadog.apm.Tracer;
 import org.junit.After;
 import org.junit.Assert;
@@ -43,8 +44,8 @@ public class TraceOperationTest {
   }
 
   @Test
-  public void methodInheritsType() {
-    Assert.assertEquals("example", example.inherits().type());
+  public void methodDoesNotInheritType() {
+    Assert.assertEquals(TraceOperation.UNKNOWN, example.inherits().type());
   }
 
   @Test

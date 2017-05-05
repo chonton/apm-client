@@ -40,8 +40,8 @@ public class TraceClientFilterTest {
 
     Span span = tracer.getCapturedSpan();
     Assert.assertEquals("service", span.getService());
-    Assert.assertEquals("GET /some/path", span.getResource());
-    Assert.assertEquals("example.com:7110", span.getOperation());
+    Assert.assertEquals("example.com:7110", span.getResource());
+    Assert.assertEquals("GET /some/path", span.getOperation());
     Assert.assertEquals(Long.parseLong((String)headerAccess.getFirst(TracerImpl.TRACE_ID), 16), span.getTraceId());
     Assert.assertEquals(Long.parseLong((String)headerAccess.getFirst(TracerImpl.SPAN_ID), 16), span.getSpanId());
   }

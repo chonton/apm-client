@@ -2,11 +2,6 @@ package org.honton.chas.datadog.apm.example.client;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import javax.inject.Inject;
 import org.honton.chas.datadog.apm.api.Span;
 import org.honton.chas.datadog.apm.example.api.Hello;
 import org.junit.After;
@@ -21,6 +16,12 @@ import org.mockserver.model.Delay;
 import org.mockserver.model.Header;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
+
+import javax.inject.Inject;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(CdiRunner.class)
 public class HelloIT {
@@ -104,19 +105,19 @@ public class HelloIT {
       }
     }
 
-    Assert.assertEquals("GET /greetings", client.getResource());
-    Assert.assertEquals("localhost:5555", client.getOperation());
+    Assert.assertEquals("localhost:5555", client.getResource());
+    Assert.assertEquals("GET /greetings", client.getOperation());
     Assert.assertNotNull(client.getTraceId());
     Assert.assertNotNull(client.getSpanId());
     Assert.assertNull(client.getParentId());
 
-    Assert.assertEquals("GET /greetings", server.getResource());
-    Assert.assertEquals("localhost:5555", server.getOperation());
+    Assert.assertEquals("localhost:5555", server.getResource());
+    Assert.assertEquals("GET /greetings", server.getOperation());
     Assert.assertEquals(client.getTraceId(), server.getTraceId());
     Assert.assertEquals(client.getSpanId(), (long)server.getParentId());
 
     Assert.assertEquals("greetings-server", intercepted.getService());
-    Assert.assertEquals("org.honton.chas.datadog.apm.example.server.Greeting", intercepted.getResource());
+    Assert.assertEquals("Greeting", intercepted.getResource());
     Assert.assertEquals(server.getTraceId(), intercepted.getTraceId());
     Assert.assertEquals(server.getSpanId(), (long)intercepted.getParentId());
   }

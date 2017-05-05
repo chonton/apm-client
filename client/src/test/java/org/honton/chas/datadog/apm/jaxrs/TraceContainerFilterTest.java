@@ -55,8 +55,8 @@ public class TraceContainerFilterTest {
 
     Span span = tracer.getCapturedSpan();
     Assert.assertEquals("service", span.getService());
-    Assert.assertEquals("GET /path", span.getResource());
-    Assert.assertEquals("example.com:7110", span.getOperation());
+    Assert.assertEquals("TraceContainerFilterTest", span.getResource());
+    Assert.assertEquals("testNoClientTrace", span.getOperation());
     return span;
   }
 

@@ -49,7 +49,7 @@ public class TraceInterceptorTest {
 
     Span span = tracer.getCapturedSpan();
     Assert.assertEquals("service", span.getService());
-    Assert.assertEquals(getClass().getCanonicalName(), span.getResource());
+    Assert.assertEquals(getClass().getSimpleName(), span.getResource());
     Assert.assertEquals(method.getName(), span.getOperation());
   }
 

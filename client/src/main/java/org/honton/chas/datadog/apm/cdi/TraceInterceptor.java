@@ -1,14 +1,15 @@
 package org.honton.chas.datadog.apm.cdi;
 
-import java.lang.reflect.Method;
+import org.honton.chas.datadog.apm.SpanBuilder;
+import org.honton.chas.datadog.apm.TraceOperation;
+
 import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 import javax.ws.rs.Priorities;
-import org.honton.chas.datadog.apm.SpanBuilder;
-import org.honton.chas.datadog.apm.TraceOperation;
+import java.lang.reflect.Method;
 
 /**
  * CDI interceptor that reports invocations of methods annotated with {@link TraceOperation} with value == true
@@ -32,7 +33,7 @@ public class TraceInterceptor {
     } finally {
       Method method = ctx.getMethod();
       span
-        .resource(method.getDeclaringClass().getCanonicalName())
+        .resource(method.getDeclaringClass().getSimpleName())
         .operation(method.getName())
         .type(getType(method));
       tracer.closeSpan(span);
@@ -41,12 +42,12 @@ public class TraceInterceptor {
 
   private static String getType(Method method) {
     TraceOperation traceOperation = method.getAnnotation(TraceOperation.class);
-    if(traceOperation == null || traceOperation.type().isEmpty()) {
+    if(traceOperation == null) {
       traceOperation = method.getDeclaringClass().getAnnotation(TraceOperation.class);
-      if (traceOperation == null || traceOperation.type().isEmpty()) {
+      if (traceOperation == null) {
         return null;
       }
     }
-    return traceOperation.type();
+    return traceOperation.type().isEmpty() ?TraceOperation.UNKNOWN :traceOperation.type();
   }
 }

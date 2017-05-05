@@ -1,19 +1,16 @@
 package org.honton.chas.datadog.apm.servlet;
 
-import java.io.IOException;
-import java.net.URLDecoder;
+import org.honton.chas.datadog.apm.SpanBuilder;
+import org.honton.chas.datadog.apm.TraceOperation;
+import org.honton.chas.datadog.apm.Tracer;
+
 import javax.inject.Inject;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.honton.chas.datadog.apm.SpanBuilder;
-import org.honton.chas.datadog.apm.Tracer;
+import java.io.IOException;
+import java.net.URLDecoder;
 
 /**
  * Trace import for http requests
@@ -46,9 +43,9 @@ public class TraceServletFilter implements Filter {
       }
     });
     try {
-      sb.resource(req.getMethod() + ' ' + URLDecoder.decode(req.getRequestURI(), "UTF-8"))
-        .operation(req.getServerName() + ':' + req.getServerPort())
-        .type(req.getScheme());
+      sb.resource(req.getServerName() + ':' + req.getServerPort())
+        .operation(req.getMethod() + ' ' + URLDecoder.decode(req.getRequestURI(), "UTF-8"))
+        .type(TraceOperation.WEB);
       filterChain.doFilter(request, response);
     } finally {
       int status = resp.getStatus();

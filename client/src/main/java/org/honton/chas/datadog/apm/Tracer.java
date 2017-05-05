@@ -45,6 +45,27 @@ public interface Tracer {
   SpanBuilder getCurrentSpan();
 
   /**
+   * Export a span across a thread.  Must be called from the exporting Thread.
+   *
+   * WARNING: Exporting a thread does not prevent the closure of parent span.  It may look like
+   * asynchronous behavior in the APM dashboard.
+   *
+   * @return  A SpanContext
+   */
+  SpanBuilder.SpanContext exportCurrentSpan();
+
+  /**
+   * Import a span across a thread.  Must be called from the importing Thread.
+   * {@link #getCurrentSpan()} must be called from the exporting Thread.
+   *
+   * WARNING: Importing a thread will destroy the current threads stack of spans!
+   *
+   * @param spanContext A SpanContext from {@link #exportCurrentSpan()}
+   * @return The SpanBuilder which is a child of the imported span.
+   */
+  SpanBuilder importCurrentSpan(SpanBuilder.SpanContext spanContext);
+
+  /**
    * Import a span across process boundaries using a set of headers.
    *
    * @param headerAccessor The function access to headers. Function supplied with header name and

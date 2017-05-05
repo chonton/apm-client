@@ -9,11 +9,9 @@ import javax.inject.Inject;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.*;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.net.URI;
 
 /**
  * Trace import for jaxrs implementations
@@ -32,38 +30,38 @@ public class TraceContainerFilter implements ContainerRequestFilter, ContainerRe
   @Context
   ResourceInfo resourceInfo;
 
-  private boolean shouldTrace() {
+  private TraceOperation getTraceOperationAnnotation() {
     Method resourceMethod = resourceInfo.getResourceMethod();
     TraceOperation traceOperation = resourceMethod.getAnnotation(TraceOperation.class);
-    if (traceOperation == null) {
-      Class<?> resourceClass = resourceInfo.getResourceClass();
-      traceOperation = resourceClass.getAnnotation(TraceOperation.class);
-      if (traceOperation == null) {
-        return true;
-      }
+    if (traceOperation != null) {
+      return traceOperation;
     }
-    return traceOperation.value();
+    Class<?> resourceClass = resourceInfo.getResourceClass();
+    return resourceClass.getAnnotation(TraceOperation.class);
   }
 
   @Override
   public void filter(final ContainerRequestContext req) throws IOException {
-    if (shouldTrace()) {
+    TraceOperation traceOperation = getTraceOperationAnnotation();
+    if (traceOperation == null || traceOperation.value()) {
       SpanBuilder sb = tracer.importSpan(new Tracer.HeaderAccessor() {
-        @Override public String getValue(String name) {
+        @Override
+        public String getValue(String name) {
           return req.getHeaderString(name);
         }
       });
 
-      UriInfo uriInfo = req.getUriInfo();
-      URI uri = uriInfo.getRequestUri();
-      sb.resource(req.getMethod() + ' ' + uriInfo.getPath())
-          .operation(uri.getHost() + ':' + uri.getPort());
+      sb.resource(resourceInfo.getResourceClass().getSimpleName())
+          .operation(resourceInfo.getResourceMethod().getName());
+
+      sb.type(traceOperation != null && !traceOperation.type().isEmpty() ?traceOperation.type() :TraceOperation.WEB);
     }
   }
 
   @Override
   public void filter(ContainerRequestContext req, ContainerResponseContext resp) throws IOException {
-    if (shouldTrace()) {
+    TraceOperation traceOperation = getTraceOperationAnnotation();
+    if (traceOperation == null || traceOperation.value()) {
       SpanBuilder currentSpan = tracer.getCurrentSpan();
       int status = resp.getStatus();
       if (status < 200 || status >= 400) {

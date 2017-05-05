@@ -2,7 +2,6 @@ package org.honton.chas.datadog.apm;
 
 import org.honton.chas.datadog.apm.cdi.TraceInterceptor;
 import org.honton.chas.datadog.apm.jaxrs.TraceContainerFilter;
-
 import org.honton.chas.datadog.apm.proxy.TraceProxyFactory;
 
 import javax.enterprise.util.Nonbinding;
@@ -27,7 +26,8 @@ public @interface TraceOperation {
    *
    * @return The type of span.
    */
-  @Nonbinding String type() default "";
+  @Nonbinding
+  String type() default "";
 
   /**
    * The predefined type for http/https spans

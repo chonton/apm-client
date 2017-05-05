@@ -55,8 +55,8 @@ public class TraceServletFilterTest {
 
     Span span = tracer.getCapturedSpan();
     Assert.assertEquals("service", span.getService());
-    Assert.assertEquals("GET /some/path", span.getResource());
-    Assert.assertEquals("example.com:7110", span.getOperation());
+    Assert.assertEquals("example.com:7110", span.getResource());
+    Assert.assertEquals("GET /some/path", span.getOperation());
     return span;
   }
 
