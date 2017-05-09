@@ -61,9 +61,11 @@ public interface Tracer {
    * WARNING: Importing a thread will destroy the current threads stack of spans!
    *
    * @param spanContext A SpanContext from {@link #exportCurrentSpan()}
+   * @param resource The resource for the new span
+   * @param operation The operation for the new span
    * @return The SpanBuilder which is a child of the imported span.
    */
-  SpanBuilder importCurrentSpan(SpanBuilder.SpanContext spanContext);
+  SpanBuilder importCurrentSpan(SpanBuilder.SpanContext spanContext, String resource, String operation);
 
   /**
    * Import a span across process boundaries using a set of headers.

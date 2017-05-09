@@ -94,8 +94,8 @@ public class TracerImpl implements Tracer {
   }
 
   @Override
-  public SpanBuilder importCurrentSpan(SpanBuilder.SpanContext spanContext) {
-    SpanBuilder span = spanContext.importSpan();
+  public SpanBuilder importCurrentSpan(SpanBuilder.SpanContext spanContext, String resource, String operation) {
+    SpanBuilder span = spanContext.importSpan(resource, operation);
     CURRENT_SPAN.set(span);
     return span;
   }

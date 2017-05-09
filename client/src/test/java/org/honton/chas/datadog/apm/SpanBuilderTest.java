@@ -1,15 +1,17 @@
 package org.honton.chas.datadog.apm;
 
-import java.util.Collections;
-import java.util.Map;
 import org.honton.chas.datadog.apm.api.Span;
 import org.honton.chas.datadog.apm.api.Trace;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+
 public class SpanBuilderTest {
 
-  public static Trace[] getTestTraces(String suffix) {
+  public static Collection<Trace> getTestTraces(String suffix) {
     SpanBuilder root = SpanBuilder.createRoot();
     root.operation("root_operation_" + suffix).resource("root-resource_" + suffix).type(TraceOperation.WEB);
 
@@ -19,20 +21,24 @@ public class SpanBuilderTest {
 
     Span rootSpan = root.finishSpan("test-service");
     Trace trace = new Trace(childSpan, rootSpan);
-    return new Trace[]{trace};
+    return Collections.singletonList(trace);
   }
 
   public static Span getTestSpan() {
-    return SpanBuilder.createRoot().finishSpan("service");
+    return createRoot().finishSpan("service");
+  }
+
+  private static SpanBuilder createRoot() {
+    return SpanBuilder.createRoot().resource("resource").operation("operation");
   }
 
   @Test
   public void testRootChildRelations() {
-    SpanBuilder rootBuilder = SpanBuilder.createRoot();
+    SpanBuilder rootBuilder= createRoot();
     Assert.assertNull(rootBuilder.parent());
     Assert.assertNull(rootBuilder.parentId());
 
-    SpanBuilder childBuilder = rootBuilder.createChild();
+    SpanBuilder childBuilder = rootBuilder.createChild().resource("childRes").operation("childOp");
     Assert.assertSame(rootBuilder, childBuilder.parent());
     
     Span childSpan = childBuilder.finishSpan("service");
@@ -52,7 +58,7 @@ public class SpanBuilderTest {
 
   @Test
   public void testMeta() {
-    SpanBuilder builder = SpanBuilder.createRoot();
+    SpanBuilder builder = createRoot();
     builder.meta("key", "value");
     Span span = builder.finishSpan("service");
 
@@ -63,7 +69,7 @@ public class SpanBuilderTest {
 
   @Test
   public void testMetrics() {
-    SpanBuilder builder = SpanBuilder.createRoot();
+    SpanBuilder builder = createRoot();
     builder.metric("columbus", 1492);
     Span span = builder.finishSpan("service");
 
@@ -99,17 +105,17 @@ public class SpanBuilderTest {
 
   @Test
   public void testUnsetType() {
-    SpanBuilder builder = SpanBuilder.createRoot();
+    SpanBuilder builder = createRoot();
     Assert.assertEquals(TraceOperation.UNKNOWN, builder.finishSpan("service").getType());
 
-    builder = SpanBuilder.createRoot().type("");
+    builder = createRoot().type("");
     Assert.assertEquals(TraceOperation.UNKNOWN, builder.finishSpan("service").getType());
   }
 
 
   @Test
   public void testSetException() {
-    SpanBuilder builder = SpanBuilder.createRoot();
+    SpanBuilder builder = createRoot();
     builder.exception(new RuntimeException("message"));
 
     Assert.assertEquals("message", builder.meta().get("error.msg"));

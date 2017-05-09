@@ -1,22 +1,21 @@
 package org.honton.chas.datadog.apm.sender;
 
-import java.util.List;
+import lombok.extern.slf4j.Slf4j;
+import org.honton.chas.datadog.apm.TraceConfiguration;
+import org.honton.chas.datadog.apm.api.*;
+import org.honton.chas.datadog.apm.jackson.MsgPackProvider;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.NotSupportedException;
 import javax.ws.rs.client.WebTarget;
-import lombok.extern.slf4j.Slf4j;
-import org.honton.chas.datadog.apm.TraceConfiguration;
-import org.honton.chas.datadog.apm.api.ApmApi;
-import org.honton.chas.datadog.apm.api.ApmApi0_2;
-import org.honton.chas.datadog.apm.api.ApmApi0_3;
-import org.honton.chas.datadog.apm.api.Span;
-import org.honton.chas.datadog.apm.api.Trace;
-import org.honton.chas.datadog.apm.jackson.MsgPackProvider;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @Slf4j
 public class Writer {
@@ -84,12 +83,9 @@ public class Writer {
   }
 
   private void trySend(List<Span> spans) {
+    Collection<Trace> traces = toTraces(spans);
+    log.debug("traces: {}", traces);
     if (System.currentTimeMillis() > backoffExpiration) {
-      Trace[] traces = new Trace[spans.size()];
-      int i = 0;
-      for(Span span : spans) {
-        traces[i++] = new Trace(span);
-      }
       try {
         send(traces);
       } catch (RuntimeException re) {
@@ -99,7 +95,15 @@ public class Writer {
     }
   }
 
-  private void send(Trace... traces) {
+  private static Collection<Trace> toTraces(List<Span> spans) {
+    List<Trace> traces = new ArrayList<>(spans.size());
+    for(Span span : spans) {
+      traces.add(new Trace(span));
+    }
+    return traces;
+  }
+
+  private void send(Collection<Trace> traces) {
     try {
       apmApi.reportTraces(traces);
     } catch (NotFoundException | NotSupportedException cee) {
@@ -113,7 +117,7 @@ public class Writer {
   }
 
   private void fallbackTo0_2() {
-    apmApi = getProxy(ApmApi0_2.class);
+    apmApi = getProxy(ApmApi0_2.class, new JacksonShim());
   }
 
   private void initializeWith0_3() {
@@ -141,11 +145,9 @@ public class Writer {
     worker.start();
   }
 
-  private <T> T getProxy(Class<T> proxyType, Object... providers) {
+  private <T> T getProxy(Class<T> proxyType, Object provider) {
     ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder();
-    for (Object provider : providers) {
-      clientBuilder.register(provider);
-    }
+    clientBuilder.register(provider);
 
     ResteasyClient client = clientBuilder.build();
     WebTarget target = client.target(apmUri);

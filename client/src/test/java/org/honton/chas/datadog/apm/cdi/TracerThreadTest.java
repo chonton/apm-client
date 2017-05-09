@@ -18,7 +18,7 @@ public class TracerThreadTest {
   }
 
   private void testImport(SpanBuilder.SpanContext ctx) {
-    SpanBuilder currentSpan = tracer.importCurrentSpan(ctx);
+    SpanBuilder currentSpan = tracer.importCurrentSpan(ctx, "ExportedResource", "exportedResource");
     Assert.assertEquals(rootBuilder.traceId(), currentSpan.traceId());
     Assert.assertEquals(rootBuilder.spanId(), currentSpan.parentId().longValue());
 
@@ -28,7 +28,7 @@ public class TracerThreadTest {
 
   @Test
   public void testExport() throws Exception {
-    rootBuilder = tracer.createSpan();
+    rootBuilder = tracer.createSpan().resource("ImportedResource").operation("importedResource");
 
     final SpanBuilder.SpanContext ctx= tracer.exportCurrentSpan();
     Thread t = new Thread() {

@@ -1,11 +1,10 @@
 package org.honton.chas.datadog.apm.api;
 
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import lombok.Value;
+
+import java.util.Map;
 
 /**
  * A span sent to the APM collector.

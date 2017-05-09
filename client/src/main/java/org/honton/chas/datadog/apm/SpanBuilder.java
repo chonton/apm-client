@@ -167,6 +167,15 @@ public class SpanBuilder {
    * @return The immutable Span that was completed
    */
   public Span finishSpan(String service) {
+    if(service == null) {
+      throw new IllegalStateException("service is null");
+    }
+    if(resource == null) {
+      throw new IllegalStateException("resource is null");
+    }
+    if(operation == null) {
+      throw new IllegalStateException("operation is null");
+    }
     return new Span(service, resource, operation,
         traceId, parentId, spanId,
         typeOrDefault(),
@@ -213,8 +222,8 @@ public class SpanBuilder {
    * The context of an active Span builder.  Used to transfer context from one thread to another.
    */
   public class SpanContext {
-    public SpanBuilder importSpan() {
-      return new SpanBuilder(null, traceId, spanId, createId());
+    public SpanBuilder importSpan(String resource, String operation) {
+      return new SpanBuilder(null, traceId, spanId, createId()).resource(resource).operation(operation);
     }
   }
 }

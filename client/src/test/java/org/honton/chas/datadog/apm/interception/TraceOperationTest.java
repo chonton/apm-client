@@ -23,7 +23,7 @@ public class TraceOperationTest {
 
   @Before
   public void createRoot() {
-    tracer.createSpan();
+    tracer.createSpan().resource("resource").operation("operation");
   }
 
   @After
