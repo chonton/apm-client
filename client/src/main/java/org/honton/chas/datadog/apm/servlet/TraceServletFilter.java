@@ -43,7 +43,7 @@ public class TraceServletFilter implements Filter {
       }
     });
     try {
-      sb.resource(req.getServerName() + ':' + req.getServerPort())
+      sb.resource(normalize(req.getServerName()) + ':' + req.getServerPort())
         .operation(req.getMethod() + ' ' + URLDecoder.decode(req.getRequestURI(), "UTF-8"))
         .type(TraceOperation.WEB);
       filterChain.doFilter(request, response);
@@ -52,6 +52,13 @@ public class TraceServletFilter implements Filter {
       sb.error(status<200 || status>=400);
       tracer.closeSpan(sb);
     }
+  }
+
+  private static String normalize(String host) {
+    if(Character.isDigit(host.charAt(0))) {
+      return ':' + host;
+    }
+    return host;
   }
 
   @Override

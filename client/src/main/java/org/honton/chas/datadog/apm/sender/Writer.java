@@ -10,6 +10,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.NotSupportedException;
 import javax.ws.rs.client.WebTarget;
@@ -83,10 +84,10 @@ public class Writer {
   }
 
   private void trySend(List<Span> spans) {
-    Collection<Trace> traces = toTraces(spans);
-    log.debug("traces: {}", traces);
     if (System.currentTimeMillis() > backoffExpiration) {
       try {
+        Collection<Trace> traces = toTraces(spans);
+        log.debug("traces: {}", traces);
         send(traces);
       } catch (RuntimeException re) {
         log.info("writer worker problem sending to " + apmUri, re);
@@ -113,6 +114,8 @@ public class Writer {
         fallbackTo0_2();
         send(traces);
       }
+    } catch (BadRequestException bre) {
+      log.error("{}: {}", bre.getMessage(), traces);
     }
   }
 

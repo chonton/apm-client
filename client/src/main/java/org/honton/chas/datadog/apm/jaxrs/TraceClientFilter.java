@@ -26,13 +26,20 @@ public class TraceClientFilter implements ClientRequestFilter, ClientResponseFil
 
   public void filter(final ClientRequestContext req) throws IOException {
     URI uri = req.getUri();
-    tracer.exportSpan(uri.getHost() + ':' + uri.getPort(), req.getMethod() + ' ' + uri.getPath(),
+    tracer.exportSpan(normalize(uri.getHost()) + ':' + uri.getPort(), req.getMethod() + ' ' + uri.getPath(),
         new Tracer.HeaderMutator() {
         @Override
         public void setValue(String name, String value) {
           req.getHeaders().putSingle(name, value);
         }
       });
+  }
+
+  private static String normalize(String host) {
+    if(Character.isDigit(host.charAt(0))) {
+      return ':' + host;
+    }
+    return host;
   }
 
   @Override
