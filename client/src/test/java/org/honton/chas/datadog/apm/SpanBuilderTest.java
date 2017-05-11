@@ -16,7 +16,7 @@ public class SpanBuilderTest {
     root.operation("root_operation_" + suffix).resource("root-resource_" + suffix).type(TraceOperation.WEB);
 
     SpanBuilder child = root.createChild();
-    child.operation("child_operation_" + suffix).resource("child_resource_" + suffix).type(TraceOperation.SQL);
+    child.operation("child_operation_" + suffix).resource("child_resource_" + suffix).type(TraceOperation.DB);
     Span childSpan = child.finishSpan("test-service");
 
     Span rootSpan = root.finishSpan("test-service");

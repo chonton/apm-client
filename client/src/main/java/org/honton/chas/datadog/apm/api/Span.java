@@ -63,7 +63,7 @@ public class Span {
   private final Map<String,Number> metrics;
 
   /**
-   * Did the span have an error?  1 -> there was an error.
+   * Did the span have an error?  1 if there was an error, 0 if there was not an error.
    */
   private final int error;
 

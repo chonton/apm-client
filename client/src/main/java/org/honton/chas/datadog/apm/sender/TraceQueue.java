@@ -33,7 +33,7 @@ public class TraceQueue {
    * Consume traces. Waits for traces as needed.
    *
    * @return All available traces
-   * @throws InterruptedException
+   * @throws InterruptedException when wait for spans is ended early
    */
   public List<Span> consume() throws InterruptedException {
     List<Span> rc;

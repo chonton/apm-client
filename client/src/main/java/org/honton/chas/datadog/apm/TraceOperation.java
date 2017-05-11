@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
 
 /**
  * Marker annotation to indicate method or type should be traced.
- * This marker will be honored by {@link TraceContainerFilter}, {@link TraceProxyFactory} and {@link TraceInterceptor)
+ * This marker will be honored by {@link TraceContainerFilter}, {@link TraceProxyFactory} and {@link TraceInterceptor}
  */
 @InterceptorBinding
 @Target({ElementType.TYPE, ElementType.METHOD})
@@ -37,7 +37,7 @@ public @interface TraceOperation {
   /**
    * The predefined type for datastore spans
    */
-  String SQL = "sql";
+  String DB = "db";
 
   /**
    * The predefined type for unknown type spans

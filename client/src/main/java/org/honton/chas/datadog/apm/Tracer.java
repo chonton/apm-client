@@ -21,6 +21,7 @@ public interface Tracer {
   /**
    * Execute a Callable with reporting
    *
+   * @param <T> The return type of the Callable
    * @param resource The resource being called
    * @param operation The operation being called
    * @param callable The Callable to invoke

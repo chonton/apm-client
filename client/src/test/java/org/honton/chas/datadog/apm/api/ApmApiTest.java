@@ -63,7 +63,7 @@ public class ApmApiTest {
 
     Map<String, ServiceData> apps = new HashMap<>();
     apps.put("tw-name", new ServiceData("tw", TraceOperation.WEB));
-    apps.put("td-name", new ServiceData("td", TraceOperation.SQL));
+    apps.put("td-name", new ServiceData("td", TraceOperation.DB));
     String serviceOK = apmApi.reportServices(apps);
     Assert.assertEquals(ApmApi.SUCCESS, serviceOK);
   }

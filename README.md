@@ -26,7 +26,7 @@ To include apm-client in your maven build, use the following fragment in your po
       <plugin>
         <groupId>org.honton.chas.datadog</groupId>
         <artifactId>apm-client</artifactId>
-        <version>0.0.3</version>
+        <version>0.0.4</version>
       </plugin>
     </plugins>
   </build>
@@ -63,9 +63,13 @@ public class TraceConfigurationFactory {
 
 ## Servlet or Container Filter
 On the server side, you can either use TraceServletFilter or TraceContainerFilter to traces incoming requests.
+TraceServletFilter can trace any servlet request and annotates the trace with the incoming URI.
+TraceContainerFilter can trace any jax-rs request and annotates the trace with the serving class and method.
 
 ## TraceServletFilter
-The TraceServletFilter traces every incoming request.  If the client request includes the
+The TraceServletFilter traces every incoming request.  The http request host/port is
+reported as the trace resource and the http request method and url are reported as the trace name. 
+If the client request includes the
 **x-ddtrace-parent_trace_id** and **x-ddtrace-parent_span_id** headers, that indicated span is used as
 the parent trace and span.  Otherwise, a new trace is created.  Once the request is complete, the
 new span or trace is closed and sent to Datadog APM.
@@ -125,7 +129,8 @@ Register TraceServletFilter, weld, and Jax-Rs application in the web.xml:
 ```
 
 ## TraceContainerFilter
-The TraceContainerFilter traces every incoming jax-rs request.  If the client request includes the
+The TraceContainerFilter traces every incoming jax-rs request.  The implementation class and method are
+reported as the trace resource and name.  If the client request includes the
 **x-ddtrace-parent_trace_id** and **x-ddtrace-parent_span_id** headers, that indicated span is used as
 the parent trace and span.  Otherwise, a new trace is created.  Once the request is complete, the
 new span or trace is closed and sent to Datadog APM.
@@ -182,7 +187,7 @@ Placing the annotation on a method will cause any invocation from outside the cl
 Placing the annotation on a class will cause all methods in that class to be traced, unless the
 method is annotated with **@TraceOperation(false)**.
 ```java
-@TraceOperation
+@TraceOperation(type=TraceOperation.DB)
 public class ExampleBean {
   
   /**
