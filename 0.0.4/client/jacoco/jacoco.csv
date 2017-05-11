@@ -1,0 +1,22 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+client,org.honton.chas.datadog.apm.api,Trace,29,30,4,2,0,5,4,4,1,4
+client,org.honton.chas.datadog.apm.api,ServiceData,0,115,1,19,0,3,1,15,0,6
+client,org.honton.chas.datadog.apm.api,Span,0,482,6,64,0,13,6,45,0,16
+client,org.honton.chas.datadog.apm.servlet,TraceServletFilter,33,87,6,4,3,17,6,5,2,4
+client,org.honton.chas.datadog.apm.servlet,TraceServletFilter.new Tracer.HeaderAccessor() {...},0,14,0,0,0,2,0,2,0,2
+client,org.honton.chas.datadog.apm.proxy,TraceProxyFactory,6,50,1,3,2,11,1,6,0,5
+client,org.honton.chas.datadog.apm.proxy,TraceProxyFactory.new InvocationHandler() {...},0,72,0,2,0,11,0,3,0,2
+client,org.honton.chas.datadog.apm.sender,Writer.new Thread() {...},0,26,0,2,0,10,0,3,0,2
+client,org.honton.chas.datadog.apm.sender,JacksonShim,0,17,0,0,0,5,0,3,0,3
+client,org.honton.chas.datadog.apm.sender,TraceQueue,5,52,0,4,0,15,0,5,0,3
+client,org.honton.chas.datadog.apm.sender,Writer,7,198,2,8,2,55,2,18,0,15
+client,org.honton.chas.datadog.apm.cdi,TraceInterceptor,0,86,0,6,0,19,0,6,0,3
+client,org.honton.chas.datadog.apm.cdi,TracerImpl,10,193,0,4,4,51,1,16,1,14
+client,org.honton.chas.datadog.apm.jackson,MsgPackProvider,1,22,2,2,0,3,2,2,0,2
+client,org.honton.chas.datadog.apm,SpanBuilder,18,281,3,15,3,51,4,36,1,30
+client,org.honton.chas.datadog.apm,SpanBuilder.SpanContext,0,23,0,0,0,2,0,2,0,2
+client,org.honton.chas.datadog.apm,TraceConfiguration,0,148,1,21,0,5,1,17,0,7
+client,org.honton.chas.datadog.apm.jaxrs,TraceClientFilter.new Tracer.HeaderMutator() {...},0,16,0,0,0,3,0,2,0,2
+client,org.honton.chas.datadog.apm.jaxrs,TraceClientFilter,13,68,4,2,1,12,3,5,0,5
+client,org.honton.chas.datadog.apm.jaxrs,TraceContainerFilter,15,87,11,7,1,23,8,6,0,5
+client,org.honton.chas.datadog.apm.jaxrs,TraceContainerFilter.new Tracer.HeaderAccessor() {...},0,14,0,0,0,2,0,2,0,2
