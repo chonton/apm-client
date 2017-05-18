@@ -1,6 +1,5 @@
 package org.honton.chas.datadog.apm;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -73,8 +72,7 @@ public class SpanBuilder {
   /**
    * A error code that occurred for span
    */
-  @Setter(AccessLevel.NONE)
-  private int error;
+  private boolean error;
 
   /**
    * The span start in nanoseconds (not epoch time)
@@ -82,11 +80,6 @@ public class SpanBuilder {
   private final long start = System.nanoTime();
 
   private static final long WALL_OFFSET = TimeUnit.MILLISECONDS.toNanos(System.currentTimeMillis()) - System.nanoTime();
-
-  public SpanBuilder error(boolean error) {
-    this.error = error ?1 :0;
-    return this;
-  }
 
   /**
    * Add a metric.
@@ -129,7 +122,7 @@ public class SpanBuilder {
   public SpanBuilder exception(Throwable e) {
     meta("error.msg", e.getMessage());
     String exception = e.getClass().getCanonicalName();
-    error = exception.hashCode();
+    error = true;
     meta.put("error.type", exception);
     meta.put("error.stack", exceptionToString(e));
     return this;
@@ -181,7 +174,7 @@ public class SpanBuilder {
         typeOrDefault(),
         copyOf(meta),
         copyOf(metrics),
-        error,
+        error ?1 :0,
         WALL_OFFSET + start, System.nanoTime() - start);
   }
 

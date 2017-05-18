@@ -81,8 +81,8 @@ public class SpanBuilderTest {
   @Test
   public void testSetterGetter() {
     SpanBuilder builder = SpanBuilder.createRoot();
-    Assert.assertEquals(0, builder.error());
-    Assert.assertEquals(1, builder.error(true).error());
+    Assert.assertFalse(builder.error());
+    Assert.assertTrue(builder.error(true).error());
 
     Assert.assertNull(builder.resource());
     Assert.assertEquals("resource", builder.resource("resource").resource());
