@@ -112,12 +112,19 @@ public class TracerImpl implements Tracer {
     SpanBuilder current;
 
     String traceIdHeader = headerAccessor.getValue(TRACE_ID);
-    if (traceIdHeader == null) {
+    String spanIdHeader = headerAccessor.getValue(SPAN_ID);
+    if (traceIdHeader == null || spanIdHeader == null) {
       current = SpanBuilder.createRoot();
-    } else {
-      long traceId = Long.parseUnsignedLong(traceIdHeader);
-      long spanId = Long.parseUnsignedLong(headerAccessor.getValue(SPAN_ID));
-      current = SpanBuilder.createChild(traceId, spanId);
+    }
+    else {
+      try {
+        current = SpanBuilder.createChild(
+            Long.parseUnsignedLong(traceIdHeader),
+            Long.parseUnsignedLong(spanIdHeader));
+      }
+      catch (NumberFormatException ignoreParseFailure) {
+        current = SpanBuilder.createRoot();
+      }
     }
     CURRENT_SPAN.set(current);
     return current;
