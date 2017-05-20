@@ -1,18 +1,19 @@
 package org.honton.chas.datadog.apm.jaxrs;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.net.URI;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerResponseContext;
-import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.UriInfo;
 import org.honton.chas.datadog.apm.api.Span;
 import org.honton.chas.datadog.apm.cdi.TracerImpl;
 import org.honton.chas.datadog.apm.cdi.TracerTestImpl;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.ContainerResponseContext;
+import javax.ws.rs.container.ResourceInfo;
+import javax.ws.rs.core.UriInfo;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.net.URI;
 
 /**
  * Testing TraceContainerFilter
@@ -69,9 +70,9 @@ public class TraceContainerFilterTest {
 
   @Test
   public void testWithClientTrace() throws Exception {
-    Span span = test("fdfd", "5a5a", 400);
-    Assert.assertEquals(0xfdfdL, span.getTraceId());
-    Assert.assertEquals(0x5a5aL, span.getParentId().longValue());
+    Span span = test("123", "456", 400);
+    Assert.assertEquals(123L, span.getTraceId());
+    Assert.assertEquals(456L, span.getParentId().longValue());
     Assert.assertEquals(1, span.getError());
   }
 }

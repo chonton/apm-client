@@ -115,8 +115,8 @@ public class TracerImpl implements Tracer {
     if (traceIdHeader == null) {
       current = SpanBuilder.createRoot();
     } else {
-      long traceId = Long.parseLong(traceIdHeader, 16);
-      long spanId = Long.parseLong(headerAccessor.getValue(SPAN_ID), 16);
+      long traceId = Long.parseUnsignedLong(traceIdHeader);
+      long spanId = Long.parseUnsignedLong(headerAccessor.getValue(SPAN_ID));
       current = SpanBuilder.createChild(traceId, spanId);
     }
     CURRENT_SPAN.set(current);
@@ -134,8 +134,8 @@ public class TracerImpl implements Tracer {
   @Override
   public void exportSpan(String resource, String operation, HeaderMutator headerAccessor) {
     SpanBuilder span = createSpan(resource, operation).type(TraceOperation.WEB);
-    headerAccessor.setValue(TRACE_ID, Long.toHexString(span.traceId()));
-    headerAccessor.setValue(SPAN_ID, Long.toHexString(span.spanId()));
+    headerAccessor.setValue(TRACE_ID, Long.toUnsignedString(span.traceId()));
+    headerAccessor.setValue(SPAN_ID, Long.toUnsignedString(span.spanId()));
   }
 
   /**

@@ -12,7 +12,7 @@ spans are queued and sent as REST messages to a [Datadog APM collector](https://
 * Lack of APM collector will be logged, but not cause failure of mainline processing
 
 ### Assumptions
-* Minimum of Java 7
+* Minimum of Java 8
 * Local (on the same host) APM collector
 * [CDI](http://www.cdi-spec.org/) implementation such as [Weld](http://weld.cdi-spec.org/)
 * [Slf4J](https://www.slf4j.org/) compliant logging implementation such as [Logback](http://logback.qos.ch/)

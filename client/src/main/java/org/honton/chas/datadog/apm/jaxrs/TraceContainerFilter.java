@@ -44,12 +44,7 @@ public class TraceContainerFilter implements ContainerRequestFilter, ContainerRe
   public void filter(final ContainerRequestContext req) throws IOException {
     TraceOperation traceOperation = getTraceOperationAnnotation();
     if (traceOperation == null || traceOperation.value()) {
-      SpanBuilder sb = tracer.importSpan(new Tracer.HeaderAccessor() {
-        @Override
-        public String getValue(String name) {
-          return req.getHeaderString(name);
-        }
-      });
+      SpanBuilder sb = tracer.importSpan(name -> req.getHeaderString(name));
 
       sb.resource(resourceInfo.getResourceClass().getSimpleName())
           .operation(resourceInfo.getResourceMethod().getName());

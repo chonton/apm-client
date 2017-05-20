@@ -71,9 +71,9 @@ public class TraceServletFilterTest {
 
   @Test
   public void testWithClientTrace() throws IOException, ServletException {
-    Span span = test("fdfd", "5a5a", 400);
-    Assert.assertEquals(0xfdfdL, span.getTraceId());
-    Assert.assertEquals(0x5a5aL, span.getParentId().longValue());
+    Span span = test("987", "654", 400);
+    Assert.assertEquals(987L, span.getTraceId());
+    Assert.assertEquals(654L, span.getParentId().longValue());
     Assert.assertEquals(1, span.getError());
   }
 

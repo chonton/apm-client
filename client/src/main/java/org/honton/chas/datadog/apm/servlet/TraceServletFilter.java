@@ -36,12 +36,7 @@ public class TraceServletFilter implements Filter {
     final HttpServletRequest req = (HttpServletRequest) request;
     final HttpServletResponse resp = (HttpServletResponse) response;
 
-    SpanBuilder sb = tracer.importSpan(new Tracer.HeaderAccessor() {
-      @Override
-      public String getValue(String name) {
-        return req.getHeader(name);
-      }
-    });
+    SpanBuilder sb = tracer.importSpan(name -> req.getHeader(name));
     try {
       sb.resource(normalize(req.getServerName()) + ':' + req.getServerPort())
         .operation(req.getMethod() + ' ' + URLDecoder.decode(req.getRequestURI(), "UTF-8"))

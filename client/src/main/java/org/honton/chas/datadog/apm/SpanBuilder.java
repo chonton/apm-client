@@ -8,10 +8,10 @@ import org.honton.chas.datadog.apm.api.Span;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class SpanBuilder {
 
-  private static final Random ID_GENERATOR = new Random();
+  private static final SecureRandom ID_GENERATOR = new SecureRandom();
 
   private final SpanBuilder parent;
 
@@ -187,13 +187,11 @@ public class SpanBuilder {
   }
 
   /**
-   * Create a 63 bit random id.  Top bit is always clear to prevent serializing negative id.
-   * @return A positive long value.
+   * Create a 64 bit random id.
+   * @return A pseudo random long value.
    */
   private static long createId() {
-    long high = ID_GENERATOR.nextInt() & 0x7fffffffL;
-    long low = ID_GENERATOR.nextInt() & 0xffffffffL;
-    return (high << 32) | low;
+    return (long)ID_GENERATOR.nextInt() << 32 | ID_GENERATOR.nextInt() & 0xffffffffL;
   }
 
   /**
