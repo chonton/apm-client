@@ -17,10 +17,17 @@ import javax.ws.rs.ext.Provider;
 @Produces(MediaType.APPLICATION_JSON)
 public class JacksonShim implements ContextResolver<ObjectMapper> {
 
-  @Override
-  public ObjectMapper getContext(final Class<?> type) {
+  private final static ObjectMapper MINIMAL_OBJECT_MAPPER = createMinimalObjectMapper();
+
+  // see MsgPackProvider.createMinimalObjectMapper()
+  private static ObjectMapper createMinimalObjectMapper() {
     ObjectMapper mapper = new ObjectMapper();
     mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
     return mapper;
+  }
+
+  @Override
+  public ObjectMapper getContext(final Class<?> type) {
+    return MINIMAL_OBJECT_MAPPER;
   }
 }

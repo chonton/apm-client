@@ -187,11 +187,16 @@ public class SpanBuilder {
   }
 
   /**
-   * Create a 64 bit random id.
-   * @return A pseudo random long value.
+   * Create a 63 bit random id.  Top bit is always clear to prevent serializing negative id.
+   * Although MsgPack format (https://github.com/msgpack/msgpack/blob/master/spec.md) supports ulong,
+   * the jackson MessagePackFactory does not.
+   *
+   * @return A positive long value.
    */
   private static long createId() {
-    return (long)ID_GENERATOR.nextInt() << 32 | ID_GENERATOR.nextInt() & 0xffffffffL;
+    long high = ID_GENERATOR.nextInt() & 0x7fffffffL;
+    long low = ID_GENERATOR.nextInt() & 0xffffffffL;
+    return (high << 32) | low;
   }
 
   /**
