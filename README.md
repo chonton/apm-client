@@ -3,7 +3,7 @@ This java client intercepts servlet requests, jax-rs client requests, and bean m
 and method names as well as the wall time and duration of the request are recorded in spans.  These
 spans are queued and sent as REST messages to a [Datadog APM collector](https://www.datadoghq.com/apm/).
 
-[Javadoc](https://chonton.github.io/apm-client/0.0.4/client/apidocs/index.html) and [build reports](https://chonton.github.io/apm-client/0.0.4/client/project-reports.html) are available.
+[Javadoc](https://chonton.github.io/apm-client/0.0.5/client/apidocs/index.html) and [build reports](https://chonton.github.io/apm-client/0.0.5/client/project-reports.html) are available.
 
 ### Requirements
 * Minimal latency in the mainline processing
@@ -26,7 +26,7 @@ To include apm-client in your maven build, use the following fragment in your po
       <plugin>
         <groupId>org.honton.chas.datadog</groupId>
         <artifactId>apm-client</artifactId>
-        <version>0.0.4</version>
+        <version>0.0.5</version>
       </plugin>
     </plugins>
   </build>
@@ -38,8 +38,6 @@ instance.  Three or four attributes are configured:
 * The service name reported with each span sent to Datadog APM collector.
 * The URL of the local Datadog APM collector.
 * The number of milliseconds to backoff.
-* An optional Span Augmenter that will be invoked whenever a span is created.  The Augmenter can add
-metadata and metrics to the span.
 
 After any communication failure, the apm-client logs the failure and will not further attempt to 
 send span information for the backoff period.  During this period all spans are dropped.
@@ -62,7 +60,7 @@ public class TraceConfigurationFactory {
 ```
 
 ## Servlet or Container Filter
-On the server side, you can either use TraceServletFilter or TraceContainerFilter to traces incoming requests.
+On the server side, you can either use TraceServletFilter or TraceContainerFilter to trace incoming requests.
 TraceServletFilter can trace any servlet request and annotates the trace with the incoming URI.
 TraceContainerFilter can trace any jax-rs request and annotates the trace with the serving class and method.
 
@@ -239,3 +237,12 @@ queued to send to Datadog APM.  Inject the Tracer to report spans with applicati
     });
   }
 ```
+
+# Update Notes
+
+## 0.0.4 to 0.0.5
+An incompatible change was made in the encoding of numbers in the trace and span headers.  Prior to
+0.0.5, the numbers were encoded in hexadecimal.  From 0.0.5 onwards the encoding is in decimal.  Additionally,
+prior to version 0.0.5, the parsing of header did not handle invalid numbers.  To upgrade without downtime, 
+rebuild and deploy the more dependent services first.
+
