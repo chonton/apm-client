@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Writer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">client</a> &gt; <a href="index.source.html" class="el_package">org.honton.chas.datadog.apm.sender</a> &gt; <span class="el_source">Writer.java</span></div><h1>Writer.java</h1><pre class="source lang-java linenums">package org.honton.chas.datadog.apm.sender;
+
+import lombok.extern.slf4j.Slf4j;
+import org.honton.chas.datadog.apm.TraceConfiguration;
+import org.honton.chas.datadog.apm.api.*;
+import org.honton.chas.datadog.apm.jackson.MsgPackProvider;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.NotSupportedException;
+import javax.ws.rs.client.WebTarget;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+<span class="fc" id="L21">@Slf4j</span>
+<span class="fc" id="L22">public class Writer {</span>
+
+  private volatile TraceQueue queue;
+
+  private Thread worker;
+  private ApmApi apmApi;
+  long backoffExpiration;
+  private long backoffDuration;
+  private String apmUri;
+
+  @Inject
+  void setTraceConfiguration(TraceConfiguration configuration) {
+<span class="fc" id="L34">    backoffDuration = configuration.getBackoffDuration();</span>
+<span class="fc" id="L35">    apmUri = configuration.getCollectorUrl();</span>
+<span class="fc" id="L36">  }</span>
+
+  @PostConstruct
+  void initialize() {
+<span class="fc" id="L40">    initializeWith0_3();</span>
+<span class="fc" id="L41">    queue = new TraceQueue();</span>
+<span class="fc" id="L42">    startWorker();</span>
+<span class="fc" id="L43">  }</span>
+
+  /**
+   * Queue a span for sending
+   *
+   * @param span The span to send to the APM collector
+   */
+  public void queue(Span span) {
+    // queue == null is signal that worker worker is no longer running
+<span class="fc" id="L52">    TraceQueue q = queue;</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">    if (q != null) {</span>
+<span class="fc" id="L54">      q.supply(span);</span>
+    }
+<span class="fc" id="L56">  }</span>
+
+  /**
+   * Stop the worker worker
+   */
+  void stop() {
+<span class="fc" id="L62">    worker.interrupt();</span>
+<span class="fc" id="L63">  }</span>
+
+  /**
+   * Has the worker been stopped?
+   */
+  boolean isStopped() {
+<span class="fc bfc" id="L69" title="All 2 branches covered.">    return queue == null;</span>
+  }
+
+  /**
+   * Single round of consuming traces from queue and sending to collector
+   *
+   * @return false, if worker worker has been shutdown
+   */
+  List&lt;Span&gt; deQueue() {
+    try {
+<span class="fc" id="L79">      return queue.consume();</span>
+<span class="fc" id="L80">    } catch (InterruptedException ie) {</span>
+<span class="fc" id="L81">      queue = null;</span>
+<span class="fc" id="L82">      return null;</span>
+    }
+  }
+
+  private void trySend(List&lt;Span&gt; spans) {
+<span class="pc bpc" id="L87" title="1 of 2 branches missed.">    if (System.currentTimeMillis() &gt; backoffExpiration) {</span>
+      try {
+<span class="fc" id="L89">        Collection&lt;Trace&gt; traces = toTraces(spans);</span>
+<span class="fc" id="L90">        log.debug(&quot;traces: {}&quot;, traces);</span>
+<span class="fc" id="L91">        send(traces);</span>
+<span class="fc" id="L92">      } catch (RuntimeException re) {</span>
+<span class="fc" id="L93">        log.info(&quot;writer worker problem sending to &quot; + apmUri, re);</span>
+<span class="fc" id="L94">        backoffExpiration = System.currentTimeMillis() + backoffDuration;</span>
+<span class="fc" id="L95">      }</span>
+    }
+<span class="fc" id="L97">  }</span>
+
+  private static Collection&lt;Trace&gt; toTraces(List&lt;Span&gt; spans) {
+<span class="fc" id="L100">    List&lt;Trace&gt; traces = new ArrayList&lt;&gt;(spans.size());</span>
+<span class="fc bfc" id="L101" title="All 2 branches covered.">    for(Span span : spans) {</span>
+<span class="fc" id="L102">      traces.add(new Trace(span));</span>
+<span class="fc" id="L103">    }</span>
+<span class="fc" id="L104">    return traces;</span>
+  }
+
+  private void send(Collection&lt;Trace&gt; traces) {
+    try {
+<span class="fc" id="L109">      apmApi.reportTraces(traces);</span>
+<span class="fc" id="L110">    } catch (NotFoundException | NotSupportedException cee) {</span>
+      // 404, 415
+<span class="fc bfc" id="L112" title="All 2 branches covered.">      if (apmApi instanceof ApmApi0_3) {</span>
+<span class="fc" id="L113">        log.info(&quot;falling back to json&quot;);</span>
+<span class="fc" id="L114">        fallbackTo0_2();</span>
+<span class="fc" id="L115">        send(traces);</span>
+      }
+<span class="nc" id="L117">    } catch (BadRequestException bre) {</span>
+<span class="nc" id="L118">      log.error(&quot;{}: {}&quot;, bre.getMessage(), traces);</span>
+<span class="fc" id="L119">    }</span>
+<span class="fc" id="L120">  }</span>
+
+  private void fallbackTo0_2() {
+<span class="fc" id="L123">    apmApi = getProxy(ApmApi0_2.class, new JacksonShim());</span>
+<span class="fc" id="L124">  }</span>
+
+  private void initializeWith0_3() {
+<span class="fc" id="L127">    apmApi = getProxy(ApmApi0_3.class, new MsgPackProvider());</span>
+<span class="fc" id="L128">  }</span>
+
+  private void startWorker() {
+<span class="fc" id="L131">    worker = new Thread(&quot;APM writer&quot;) {</span>
+      {
+<span class="fc" id="L133">        setDaemon(true);</span>
+<span class="fc" id="L134">      }</span>
+
+      @Override
+      public void run() {
+        for(;;) {
+<span class="fc" id="L139">          List&lt;Span&gt; spans = deQueue();</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">          if(spans == null) {</span>
+<span class="fc" id="L141">            log.error(&quot;writer worker shutdown&quot;);</span>
+<span class="fc" id="L142">            break;</span>
+          }
+<span class="fc" id="L144">          trySend(spans);</span>
+<span class="fc" id="L145">        }</span>
+<span class="fc" id="L146">      }</span>
+    };
+<span class="fc" id="L148">    worker.start();</span>
+<span class="fc" id="L149">  }</span>
+
+  private &lt;T&gt; T getProxy(Class&lt;T&gt; proxyType, Object provider) {
+<span class="fc" id="L152">    ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder();</span>
+<span class="fc" id="L153">    clientBuilder.register(provider);</span>
+
+<span class="fc" id="L155">    ResteasyClient client = clientBuilder.build();</span>
+<span class="fc" id="L156">    WebTarget target = client.target(apmUri);</span>
+<span class="fc" id="L157">    ResteasyWebTarget rtarget = (ResteasyWebTarget) target;</span>
+
+<span class="fc" id="L159">    return rtarget.proxy(proxyType);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.7.201606060606</span></div></body></html>

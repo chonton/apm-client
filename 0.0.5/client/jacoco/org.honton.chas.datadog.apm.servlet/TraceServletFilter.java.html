@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TraceServletFilter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">client</a> &gt; <a href="index.source.html" class="el_package">org.honton.chas.datadog.apm.servlet</a> &gt; <span class="el_source">TraceServletFilter.java</span></div><h1>TraceServletFilter.java</h1><pre class="source lang-java linenums">package org.honton.chas.datadog.apm.servlet;
+
+import org.honton.chas.datadog.apm.SpanBuilder;
+import org.honton.chas.datadog.apm.TraceOperation;
+import org.honton.chas.datadog.apm.Tracer;
+
+import javax.inject.Inject;
+import javax.servlet.*;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URLDecoder;
+
+/**
+ * Trace import for http requests
+ */
+@WebFilter(&quot;/*&quot;)
+<span class="fc" id="L19">public class TraceServletFilter implements Filter {</span>
+
+  private Tracer tracer;
+
+  @Inject
+  void setTracer(Tracer tracer) {
+<span class="fc" id="L25">    this.tracer = tracer;</span>
+<span class="fc" id="L26">  }</span>
+
+  @Override
+  public void init(FilterConfig filterConfig) {
+<span class="nc" id="L30">  }</span>
+
+  @Override
+  public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
+      throws IOException, ServletException {
+
+<span class="fc" id="L36">    final HttpServletRequest req = (HttpServletRequest) request;</span>
+<span class="fc" id="L37">    final HttpServletResponse resp = (HttpServletResponse) response;</span>
+
+<span class="fc" id="L39">    SpanBuilder sb = tracer.importSpan(name -&gt; req.getHeader(name));</span>
+    try {
+<span class="fc" id="L41">      sb.resource(normalize(req.getServerName()) + ':' + req.getServerPort())</span>
+<span class="fc" id="L42">        .operation(req.getMethod() + ' ' + URLDecoder.decode(req.getRequestURI(), &quot;UTF-8&quot;))</span>
+<span class="fc" id="L43">        .type(TraceOperation.WEB);</span>
+<span class="fc" id="L44">      filterChain.doFilter(request, response);</span>
+    } finally {
+<span class="pc" id="L46">      int status = resp.getStatus();</span>
+<span class="pc bpc" id="L47" title="5 of 8 branches missed.">      sb.error(status&lt;200 || status&gt;=400);</span>
+<span class="pc" id="L48">      tracer.closeSpan(sb);</span>
+<span class="pc" id="L49">    }</span>
+<span class="fc" id="L50">  }</span>
+
+  private static String normalize(String host) {
+<span class="pc bpc" id="L53" title="1 of 2 branches missed.">    if(Character.isDigit(host.charAt(0))) {</span>
+<span class="nc" id="L54">      return ':' + host;</span>
+    }
+<span class="fc" id="L56">    return host;</span>
+  }
+
+  @Override
+  public void destroy() {
+<span class="nc" id="L61">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.7.201606060606</span></div></body></html>

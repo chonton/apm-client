@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SpanBuilder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">client</a> &gt; <a href="index.source.html" class="el_package">org.honton.chas.datadog.apm</a> &gt; <span class="el_source">SpanBuilder.java</span></div><h1>SpanBuilder.java</h1><pre class="source lang-java linenums">package org.honton.chas.datadog.apm;
+
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+import org.honton.chas.datadog.apm.api.Span;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.security.SecureRandom;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * An active Span builder.  Provides methods to get and set the Span attributes.
+ * Some attributes, such as the start time, traceId, and parentId
+ * are final and cannot be modified.
+ */
+@Accessors(fluent = true)
+@Getter
+<span class="fc" id="L24">@Setter</span>
+<span class="fc" id="L25">@RequiredArgsConstructor</span>
+public class SpanBuilder {
+
+<span class="fc" id="L28">  private static final SecureRandom ID_GENERATOR = new SecureRandom();</span>
+
+<span class="fc" id="L30">  private final SpanBuilder parent;</span>
+
+  /**
+   * The resource name.
+   */
+<span class="fc" id="L35">  private String resource;</span>
+
+  /**
+   * The operation name.
+   */
+<span class="fc" id="L40">  private String operation;</span>
+
+  /**
+   * The id of the trace's root span.
+   */
+<span class="fc" id="L45">  private final long traceId;</span>
+
+  /**
+   * The id of the span's direct parent span.
+   */
+<span class="fc" id="L50">  private final Long parentId;</span>
+
+  /**
+   * The id of the span.
+   */
+<span class="fc" id="L55">  private final long spanId;</span>
+
+  /** 
+   * The type of the span. e.g. http, sql
+   */
+<span class="fc" id="L60">  private String type;</span>
+
+  /**
+   * The tags in the span.
+   */
+<span class="fc" id="L65">  private Map&lt;String, String&gt; meta;</span>
+
+  /**
+   * The metrics in the span.
+   */
+<span class="fc" id="L70">  private Map&lt;String, Number&gt; metrics;</span>
+
+  /**
+   * A error code that occurred for span
+   */
+<span class="fc" id="L75">  private boolean error;</span>
+
+  /**
+   * The span start in nanoseconds (not epoch time)
+   */
+<span class="pc" id="L80">  private final long start = System.nanoTime();</span>
+
+<span class="fc" id="L82">  private static final long WALL_OFFSET = TimeUnit.MILLISECONDS.toNanos(System.currentTimeMillis()) - System.nanoTime();</span>
+
+  /**
+   * Add a metric.
+   * 
+   * @param key The name of the metric
+   * @param value The value of the metric
+   * 
+   * @return The builder, for fluent style programming
+   */
+  public SpanBuilder metric(String key, Number value) {
+<span class="fc bfc" id="L93" title="All 2 branches covered.">    if(metrics == null) {</span>
+<span class="fc" id="L94">      metrics = new HashMap&lt;&gt;();</span>
+    }
+<span class="fc" id="L96">    metrics.put(key, value);</span>
+<span class="fc" id="L97">    return this;</span>
+  }
+
+  /**
+   * Add meta information.
+   * 
+   * @param key The name of the meta information
+   * @param value The value of the meta information
+   * 
+   * @return The builder, for fluent style programming
+   */
+  public SpanBuilder meta(String key, String value) {
+<span class="fc bfc" id="L109" title="All 2 branches covered.">    if(meta == null) {</span>
+<span class="fc" id="L110">      meta = new HashMap&lt;&gt;();</span>
+    }
+<span class="fc" id="L112">    meta.put(key, value);</span>
+<span class="fc" id="L113">    return this;</span>
+  }
+
+  /**
+   * Add exception information to the metadata.  Any previous exception information will be overwritten.
+   * 
+   * @param e The exception to add
+   * @return The builder, for fluent style programming
+   */
+  public SpanBuilder exception(Throwable e) {
+<span class="fc" id="L123">    meta(&quot;error.msg&quot;, e.getMessage());</span>
+<span class="fc" id="L124">    String exception = e.getClass().getCanonicalName();</span>
+<span class="fc" id="L125">    error = true;</span>
+<span class="fc" id="L126">    meta.put(&quot;error.type&quot;, exception);</span>
+<span class="fc" id="L127">    meta.put(&quot;error.stack&quot;, exceptionToString(e));</span>
+<span class="fc" id="L128">    return this;</span>
+  }
+
+  /**
+   * Create a child of this span
+   * @return The child span
+   */
+  public SpanBuilder createChild() {
+<span class="fc" id="L136">    return new SpanBuilder(this, traceId, spanId, createId());</span>
+  }
+
+  /**
+   * Create a builder for a root span.
+   * @return A builder for a root span
+   */
+  public static SpanBuilder createRoot() {
+<span class="fc" id="L144">    return new SpanBuilder(null, createId(), null, createId());</span>
+  }
+
+  /**
+   * Create a builder for a span which is a child of another span.
+   * @param traceId The id of the trace
+   * @param parentSpanId The id of the parent span
+   * @return The span which is a child the the imported span.
+   */
+  public static SpanBuilder createChild(long traceId, long parentSpanId) {
+<span class="fc" id="L154">    return new SpanBuilder(null, traceId, parentSpanId, createId());</span>
+  }
+
+  /**
+   * Finish building the span.  Sets the duration of the span.
+   * @param service The service value
+   * @return The immutable Span that was completed
+   */
+  public Span finishSpan(String service) {
+<span class="pc bpc" id="L163" title="1 of 2 branches missed.">    if(service == null) {</span>
+<span class="nc" id="L164">      throw new IllegalStateException(&quot;service is null&quot;);</span>
+    }
+<span class="pc bpc" id="L166" title="1 of 2 branches missed.">    if(resource == null) {</span>
+<span class="nc" id="L167">      throw new IllegalStateException(&quot;resource is null&quot;);</span>
+    }
+<span class="pc bpc" id="L169" title="1 of 2 branches missed.">    if(operation == null) {</span>
+<span class="nc" id="L170">      throw new IllegalStateException(&quot;operation is null&quot;);</span>
+    }
+<span class="fc" id="L172">    return new Span(service, resource, operation,</span>
+        traceId, parentId, spanId,
+<span class="fc" id="L174">        typeOrDefault(),</span>
+<span class="fc" id="L175">        copyOf(meta),</span>
+<span class="fc bfc" id="L176" title="All 2 branches covered.">        copyOf(metrics),</span>
+        error ?1 :0,
+<span class="fc" id="L178">        WALL_OFFSET + start, System.nanoTime() - start);</span>
+  }
+
+  private String typeOrDefault() {
+<span class="fc bfc" id="L182" title="All 4 branches covered.">    return type==null || type.isEmpty() ?TraceOperation.UNKNOWN :type;</span>
+  }
+
+  private static &lt;K,V&gt; Map&lt;K,V&gt; copyOf(Map&lt;K,V&gt; map) {
+<span class="fc bfc" id="L186" title="All 2 branches covered.">    return map != null ?Collections.unmodifiableMap(new HashMap&lt;&gt;(map)) : null;</span>
+  }
+
+  /**
+   * Create a 63 bit random id.  Top bit is always clear to prevent serializing negative id.
+   * Although MsgPack format (https://github.com/msgpack/msgpack/blob/master/spec.md) supports ulong,
+   * the jackson MessagePackFactory does not.
+   *
+   * @return A positive long value.
+   */
+  private static long createId() {
+<span class="fc" id="L197">    long high = ID_GENERATOR.nextInt() &amp; 0x7fffffffL;</span>
+<span class="fc" id="L198">    long low = ID_GENERATOR.nextInt() &amp; 0xffffffffL;</span>
+<span class="fc" id="L199">    return (high &lt;&lt; 32) | low;</span>
+  }
+
+  /**
+   * Create a string representation of an exception stack trace.
+   * @param ex The exceptions
+   * @return The stack trace
+   */
+  private static String exceptionToString(Throwable ex) {
+<span class="fc" id="L208">    StringWriter errors = new StringWriter();</span>
+<span class="fc" id="L209">    ex.printStackTrace(new PrintWriter(errors));</span>
+<span class="fc" id="L210">    return errors.toString();</span>
+  }
+
+  public SpanContext exportSpan() {
+<span class="fc" id="L214">    return new SpanContext();</span>
+  }
+
+  /**
+   * The context of an active Span builder.  Used to transfer context from one thread to another.
+   */
+<span class="fc" id="L220">  public class SpanContext {</span>
+    public SpanBuilder importSpan(String resource, String operation) {
+<span class="fc" id="L222">      return new SpanBuilder(null, traceId, spanId, createId()).resource(resource).operation(operation);</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.7.201606060606</span></div></body></html>
