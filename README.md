@@ -24,8 +24,8 @@ To include apm-client in your maven build, use the following fragment in your po
   <build>
     <plugins>
       <plugin>
-        <groupId>org.honton.chas.datadog</groupId>
-        <artifactId>apm-client</artifactId>
+        <groupId>org.honton.chas.datadog.apm</groupId>
+        <artifactId>client</artifactId>
         <version>0.0.5</version>
       </plugin>
     </plugins>
