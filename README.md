@@ -3,7 +3,7 @@ This java client intercepts servlet requests, jax-rs client requests, and bean m
 and method names as well as the wall time and duration of the request are recorded in spans.  These
 spans are queued and sent as REST messages to a [Datadog APM collector](https://www.datadoghq.com/apm/).
 
-[Javadoc](https://chonton.github.io/apm-client/0.0.5/client/apidocs/index.html) and [build reports](https://chonton.github.io/apm-client/0.0.5/client/project-reports.html) are available.
+[Javadoc](https://chonton.github.io/apm-client/0.0.6/client/apidocs/index.html) and [build reports](https://chonton.github.io/apm-client/0.0.6/client/project-reports.html) are available.
 
 ### Requirements
 * Minimal latency in the mainline processing
@@ -26,7 +26,7 @@ To include apm-client in your maven build, use the following fragment in your po
       <plugin>
         <groupId>org.honton.chas.datadog.apm</groupId>
         <artifactId>client</artifactId>
-        <version>0.0.5</version>
+        <version>0.0.6</version>
       </plugin>
     </plugins>
   </build>
@@ -34,9 +34,9 @@ To include apm-client in your maven build, use the following fragment in your po
 
 ## Configuration
 To configure apm-client, you must supply a CDI factory method which produces a TraceConfiguration
-instance.  Three or four attributes are configured:
+instance.  Three attributes are configured:
 * The service name reported with each span sent to Datadog APM collector.
-* The URL of the local Datadog APM collector.
+* The URL of the local Datadog APM collector.  If null or empty, this will prevent sending traces.
 * The number of milliseconds to backoff.
 
 After any communication failure, the apm-client logs the failure and will not further attempt to 
@@ -239,6 +239,9 @@ queued to send to Datadog APM.  Inject the Tracer to report spans with applicati
 ```
 
 # Update Notes
+
+## 0.0.5 to 0.0.6
+The URL of the local Datadog APM collector can be set to null or empty; this will prevent sending traces.
 
 ## 0.0.4 to 0.0.5
 An incompatible change was made in the encoding of numbers in the trace and span headers.  Prior to

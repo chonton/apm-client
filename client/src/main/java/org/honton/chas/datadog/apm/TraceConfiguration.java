@@ -12,17 +12,17 @@ import lombok.Value;
 public class TraceConfiguration {
 
   /**
-   * The service name reported to the collector
+   * The service name reported to the collector.
    */
   private String service;
 
   /**
-   * The collector url
+   * The collector url.   If null or empty, will disable the collector.
    */
   private String collectorUrl;
 
   /**
-   * The number of milliseconds that collection is squelched after communication failure
+   * The number of milliseconds that collection is squelched after communication failure.
    */
   private long backoffDuration;
 }

@@ -4,7 +4,7 @@
 
   <groupId>org.honton.chas.datadog.apm</groupId>
   <artifactId>parent</artifactId>
-  <version>0.0.5</version>
+  <version>0.0.6</version>
   <packaging>pom</packaging>
 
   <name>${project.artifactId}</name>
@@ -572,7 +572,6 @@
             <configuration>
               <message>Site documentation</message>
               <path>${project.version}</path>
-              <merge>false</merge>
               <server>github</server>
               <repositoryName>apm-client</repositoryName>
               <repositoryOwner>chonton</repositoryOwner>

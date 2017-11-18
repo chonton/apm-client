@@ -1,22 +1,25 @@
 package org.honton.chas.datadog.apm.sender;
 
-import lombok.extern.slf4j.Slf4j;
-import org.honton.chas.datadog.apm.TraceConfiguration;
-import org.honton.chas.datadog.apm.api.*;
-import org.honton.chas.datadog.apm.jackson.MsgPackProvider;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
-
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.NotSupportedException;
 import javax.ws.rs.client.WebTarget;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import lombok.extern.slf4j.Slf4j;
+import org.honton.chas.datadog.apm.TraceConfiguration;
+import org.honton.chas.datadog.apm.api.ApmApi;
+import org.honton.chas.datadog.apm.api.ApmApi0_2;
+import org.honton.chas.datadog.apm.api.ApmApi0_3;
+import org.honton.chas.datadog.apm.api.Span;
+import org.honton.chas.datadog.apm.api.Trace;
+import org.honton.chas.datadog.apm.jackson.MsgPackProvider;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
 @Slf4j
 public class Writer {
@@ -35,11 +38,14 @@ public class Writer {
     apmUri = configuration.getCollectorUrl();
   }
 
-  @PostConstruct
-  void initialize() {
-    initializeWith0_3();
-    queue = new TraceQueue();
-    startWorker();
+  @PostConstruct void initialize() {
+    if (apmUri == null || apmUri.isEmpty()) {
+      log.info("trace writer disabled");
+    } else {
+      initializeWith0_3();
+      queue = new TraceQueue();
+      startWorker();
+    }
   }
 
   /**
@@ -48,7 +54,7 @@ public class Writer {
    * @param span The span to send to the APM collector
    */
   public void queue(Span span) {
-    // queue == null is signal that worker worker is no longer running
+    // queue == null is signal that worker worker is no longer running (or was never started)
     TraceQueue q = queue;
     if (q != null) {
       q.supply(span);
@@ -90,7 +96,7 @@ public class Writer {
         log.debug("traces: {}", traces);
         send(traces);
       } catch (RuntimeException re) {
-        log.info("writer worker problem sending to " + apmUri, re);
+        log.info("writer worker problem {} sending to {} ", re.getMessage(), apmUri);
         backoffExpiration = System.currentTimeMillis() + backoffDuration;
       }
     }

@@ -71,22 +71,27 @@ public class WriterTest {
           VerificationTimes.exactly(1));
   }
 
-  private Writer startWriter(String url) throws InterruptedException {
+  private Writer startWriter(String url) {
     Writer writer = new Writer();
-    writer.setTraceConfiguration(new TraceConfiguration("service", "http://localhost:7755", TimeUnit.MINUTES.toMillis(1)));
+    writer.setTraceConfiguration(new TraceConfiguration("service", url, TimeUnit.MINUTES.toMillis(1)));
     writer.initialize();
-
-    writer.queue(SpanBuilderTest.getTestSpan());
-    // wait for queuing ...
-    Thread.sleep(200);
-    writer.stop();
     return writer;
   }
 
   private void testFallback(int status) throws InterruptedException {
     expectations(status);
-    startWriter("http://localhost:7755");
+    Writer writer = startWriter("http://localhost:7755");
+
+    queueSpan(writer);
+    writer.stop();
+
     verifications();
+  }
+
+  private void queueSpan(Writer writer) throws InterruptedException {
+    writer.queue(SpanBuilderTest.getTestSpan());
+    // wait for queuing ...
+    Thread.sleep(200);
   }
 
   @Test
@@ -102,9 +107,22 @@ public class WriterTest {
   @Test
   public void testNoCollector() throws InterruptedException {
     Writer writer = startWriter("http://localhost:1");
+    queueSpan(writer);
     Assert.assertFalse(writer.isStopped());
-    writer.queue(SpanBuilderTest.getTestSpan());
-    Thread.sleep(200);
+    writer.stop();
+    queueSpan(writer);
+    Assert.assertTrue(writer.isStopped());
+  }
+
+  @Test
+  public void testNoStartEmpty() throws InterruptedException {
+    Writer writer = startWriter("");
+    Assert.assertTrue(writer.isStopped());
+  }
+
+  @Test
+  public void testNoStartNull() throws InterruptedException {
+    Writer writer = startWriter(null);
     Assert.assertTrue(writer.isStopped());
   }
 }
