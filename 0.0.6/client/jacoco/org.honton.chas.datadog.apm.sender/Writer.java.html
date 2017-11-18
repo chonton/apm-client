@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Writer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">client</a> &gt; <a href="index.source.html" class="el_package">org.honton.chas.datadog.apm.sender</a> &gt; <span class="el_source">Writer.java</span></div><h1>Writer.java</h1><pre class="source lang-java linenums">package org.honton.chas.datadog.apm.sender;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.NotSupportedException;
+import javax.ws.rs.client.WebTarget;
+import lombok.extern.slf4j.Slf4j;
+import org.honton.chas.datadog.apm.TraceConfiguration;
+import org.honton.chas.datadog.apm.api.ApmApi;
+import org.honton.chas.datadog.apm.api.ApmApi0_2;
+import org.honton.chas.datadog.apm.api.ApmApi0_3;
+import org.honton.chas.datadog.apm.api.Span;
+import org.honton.chas.datadog.apm.api.Trace;
+import org.honton.chas.datadog.apm.jackson.MsgPackProvider;
+import org.jboss.resteasy.client.jaxrs.ResteasyClient;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+
+<span class="fc" id="L24">@Slf4j</span>
+<span class="fc" id="L25">public class Writer {</span>
+
+  private volatile TraceQueue queue;
+
+  private Thread worker;
+  private ApmApi apmApi;
+  long backoffExpiration;
+  private long backoffDuration;
+  private String apmUri;
+
+  @Inject
+  void setTraceConfiguration(TraceConfiguration configuration) {
+<span class="fc" id="L37">    backoffDuration = configuration.getBackoffDuration();</span>
+<span class="fc" id="L38">    apmUri = configuration.getCollectorUrl();</span>
+<span class="fc" id="L39">  }</span>
+
+  @PostConstruct void initialize() {
+<span class="fc bfc" id="L42" title="All 4 branches covered.">    if (apmUri == null || apmUri.isEmpty()) {</span>
+<span class="fc" id="L43">      log.info(&quot;trace writer disabled&quot;);</span>
+    } else {
+<span class="fc" id="L45">      initializeWith0_3();</span>
+<span class="fc" id="L46">      queue = new TraceQueue();</span>
+<span class="fc" id="L47">      startWorker();</span>
+    }
+<span class="fc" id="L49">  }</span>
+
+  /**
+   * Queue a span for sending
+   *
+   * @param span The span to send to the APM collector
+   */
+  public void queue(Span span) {
+    // queue == null is signal that worker worker is no longer running (or was never started)
+<span class="fc" id="L58">    TraceQueue q = queue;</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">    if (q != null) {</span>
+<span class="fc" id="L60">      q.supply(span);</span>
+    }
+<span class="fc" id="L62">  }</span>
+
+  /**
+   * Stop the worker worker
+   */
+  void stop() {
+<span class="fc" id="L68">    worker.interrupt();</span>
+<span class="fc" id="L69">  }</span>
+
+  /**
+   * Has the worker been stopped?
+   */
+  boolean isStopped() {
+<span class="fc bfc" id="L75" title="All 2 branches covered.">    return queue == null;</span>
+  }
+
+  /**
+   * Single round of consuming traces from queue and sending to collector
+   *
+   * @return false, if worker worker has been shutdown
+   */
+  List&lt;Span&gt; deQueue() {
+    try {
+<span class="fc" id="L85">      return queue.consume();</span>
+<span class="fc" id="L86">    } catch (InterruptedException ie) {</span>
+<span class="fc" id="L87">      queue = null;</span>
+<span class="fc" id="L88">      return null;</span>
+    }
+  }
+
+  private void trySend(List&lt;Span&gt; spans) {
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">    if (System.currentTimeMillis() &gt; backoffExpiration) {</span>
+      try {
+<span class="fc" id="L95">        Collection&lt;Trace&gt; traces = toTraces(spans);</span>
+<span class="fc" id="L96">        log.debug(&quot;traces: {}&quot;, traces);</span>
+<span class="fc" id="L97">        send(traces);</span>
+<span class="fc" id="L98">      } catch (RuntimeException re) {</span>
+<span class="fc" id="L99">        log.info(&quot;writer worker problem {} sending to {} &quot;, re.getMessage(), apmUri);</span>
+<span class="fc" id="L100">        backoffExpiration = System.currentTimeMillis() + backoffDuration;</span>
+<span class="fc" id="L101">      }</span>
+    }
+<span class="fc" id="L103">  }</span>
+
+  private static Collection&lt;Trace&gt; toTraces(List&lt;Span&gt; spans) {
+<span class="fc" id="L106">    List&lt;Trace&gt; traces = new ArrayList&lt;&gt;(spans.size());</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">    for(Span span : spans) {</span>
+<span class="fc" id="L108">      traces.add(new Trace(span));</span>
+<span class="fc" id="L109">    }</span>
+<span class="fc" id="L110">    return traces;</span>
+  }
+
+  private void send(Collection&lt;Trace&gt; traces) {
+    try {
+<span class="fc" id="L115">      apmApi.reportTraces(traces);</span>
+<span class="fc" id="L116">    } catch (NotFoundException | NotSupportedException cee) {</span>
+      // 404, 415
+<span class="pc bpc" id="L118" title="1 of 2 branches missed.">      if (apmApi instanceof ApmApi0_3) {</span>
+<span class="fc" id="L119">        log.info(&quot;falling back to json&quot;);</span>
+<span class="fc" id="L120">        fallbackTo0_2();</span>
+<span class="fc" id="L121">        send(traces);</span>
+      }
+<span class="nc" id="L123">    } catch (BadRequestException bre) {</span>
+<span class="nc" id="L124">      log.error(&quot;{}: {}&quot;, bre.getMessage(), traces);</span>
+<span class="fc" id="L125">    }</span>
+<span class="fc" id="L126">  }</span>
+
+  private void fallbackTo0_2() {
+<span class="fc" id="L129">    apmApi = getProxy(ApmApi0_2.class, new JacksonShim());</span>
+<span class="fc" id="L130">  }</span>
+
+  private void initializeWith0_3() {
+<span class="fc" id="L133">    apmApi = getProxy(ApmApi0_3.class, new MsgPackProvider());</span>
+<span class="fc" id="L134">  }</span>
+
+  private void startWorker() {
+<span class="fc" id="L137">    worker = new Thread(&quot;APM writer&quot;) {</span>
+      {
+<span class="fc" id="L139">        setDaemon(true);</span>
+<span class="fc" id="L140">      }</span>
+
+      @Override
+      public void run() {
+        for(;;) {
+<span class="fc" id="L145">          List&lt;Span&gt; spans = deQueue();</span>
+<span class="fc bfc" id="L146" title="All 2 branches covered.">          if(spans == null) {</span>
+<span class="fc" id="L147">            log.error(&quot;writer worker shutdown&quot;);</span>
+<span class="fc" id="L148">            break;</span>
+          }
+<span class="fc" id="L150">          trySend(spans);</span>
+<span class="fc" id="L151">        }</span>
+<span class="fc" id="L152">      }</span>
+    };
+<span class="fc" id="L154">    worker.start();</span>
+<span class="fc" id="L155">  }</span>
+
+  private &lt;T&gt; T getProxy(Class&lt;T&gt; proxyType, Object provider) {
+<span class="fc" id="L158">    ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder();</span>
+<span class="fc" id="L159">    clientBuilder.register(provider);</span>
+
+<span class="fc" id="L161">    ResteasyClient client = clientBuilder.build();</span>
+<span class="fc" id="L162">    WebTarget target = client.target(apmUri);</span>
+<span class="fc" id="L163">    ResteasyWebTarget rtarget = (ResteasyWebTarget) target;</span>
+
+<span class="fc" id="L165">    return rtarget.proxy(proxyType);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.7.201606060606</span></div></body></html>
