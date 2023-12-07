@@ -1,3 +1,5 @@
+# UP FOR ADOPTION
+
 # apm-client
 This java client intercepts servlet requests, jax-rs client requests, and bean methods.  The resource
 and method names as well as the wall time and duration of the request are recorded in spans.  These
