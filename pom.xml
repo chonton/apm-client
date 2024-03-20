@@ -65,7 +65,7 @@
     <jetty.version>9.4.53.v20231009</jetty.version>
     <jsonpath.version>0.9.1</jsonpath.version>
     <junit.version>4.12</junit.version>
-    <logback.version>1.4.11</logback.version>
+    <logback.version>1.4.12</logback.version>
     <lombok.version>1.16.10</lombok.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
