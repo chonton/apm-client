@@ -76,7 +76,7 @@
     <mockserver.version>3.10.4</mockserver.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <resteasy.version>3.1.0.Final</resteasy.version>
-    <slf4j.version>1.7.21</slf4j.version>
+    <slf4j.version>1.7.36</slf4j.version>
     <weld.version>2.4.1.Final</weld.version>
   </properties>
 
